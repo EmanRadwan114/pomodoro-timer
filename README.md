@@ -1,4 +1,4 @@
-# ⏳ Pomodoro Timer
+#  🍅⏳ Pomodoro Timer
 
 A **simple and flexible Pomodoro Timer** designed to boost productivity. By implementing the **Pomodoro Technique**, this timer helps you break work into intervals (typically 25 minutes) separated by short breaks. This allows you to maintain focus while ensuring adequate rest.
 
