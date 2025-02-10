@@ -18,6 +18,7 @@ import {
   displayUserProgress,
   emptyTaskContainer,
   getTaskDate,
+  isFormValidated,
   showAndHideTaskNotes,
   showModal,
   stopOtherWorkingTimer,
@@ -26,11 +27,13 @@ import {
   switchtoAddMode,
   switchtoEditMode,
   updateTimerData,
+  validateForm,
 } from "./utilitis.js";
 
 // ^-------------------------------Tasks List---------------------------------
-const taskListSection = document.getElementById("tasks");
-const tasksContainer = document.getElementById("tasks-container");
+const taskListSection = document.querySelector("#tasks .tasks-container");
+export const tasksContainer = document.getElementById("tasks-container");
+export const startingTxt = document.querySelector(".start-txt");
 const tasksNum = document.querySelector(".tasks-container h2 span");
 const celebrateTxt = document.getElementById("celebrate-txt");
 const completedTasks = document.querySelector("#progress .completed");
@@ -45,7 +48,18 @@ const progressObj = {
 };
 
 // & 1- display all tasks
-displayTasks(tasksList.length, tasksList, tasksContainer);
+console.log(window.screen.width);
+
+if (window.screen.width > 992) {
+  taskListSection.style.height =
+    parseInt(getComputedStyle(taskListSection.parentElement).height) -
+    20 +
+    "px";
+  console.log(taskListSection.style.height);
+} else {
+}
+
+displayTasks(tasksList.length, tasksList);
 
 // & 2- show user progress
 displayUserProgress(progressObj, tasksList);
@@ -53,6 +67,7 @@ displayUserProgress(progressObj, tasksList);
 // & 3- CRUD OPerations
 const addTaskBtn = document.querySelector("#add-task .add-btn");
 const addTaskModal = document.getElementById("add-task-modal");
+export const validationTxt = document.getElementById("validation-txt");
 export const titleField = document.getElementById("task-title");
 export const categoryItems = document.querySelectorAll(".item");
 export const sessionNum = document.querySelector(".session-nums .num p");
@@ -66,11 +81,6 @@ const editBtn = document.querySelector("#add-task-modal .edit-btn");
 const cancelTaskAddBtn = document.querySelector("#add-task-modal .cancel-btn");
 const showTaskModal = document.getElementById("show-task-details");
 const okBtn = document.querySelector("#show-task-details .close-modal-btn");
-const displayTaskBtns = document.getElementsByClassName("display-task-btn");
-const editTaskBtns = document.getElementsByClassName("edit-task-btn");
-const completeTaskBtns = document.getElementsByClassName("complete-task-btn");
-const circles = document.getElementsByClassName("circle");
-const deleteTaskBtns = document.getElementsByClassName("delete-task-btn");
 const deleteTaskModal = document.getElementById("delete-task-modal");
 const confirmDeleteBtn = document.querySelector(
   "#delete-task-modal .delete-btn"
@@ -92,6 +102,9 @@ addTaskBtn.addEventListener("click", (e) => {
   switchtoAddMode(addBtn, editBtn);
 });
 
+// ? validating task form
+validateForm();
+
 // ?choose category
 const chosenCategory = chooseCategory(categoryItems);
 
@@ -112,7 +125,7 @@ minusBtn.addEventListener("click", (e) => {
 
 // ? add task note
 addNoteBtn.addEventListener("click", (e) => {
-  showAndHideTaskNotes(noteContent, e.target);
+  showAndHideTaskNotes();
 });
 
 // ? set minimum data time
@@ -122,63 +135,46 @@ sessionTime.min = now.toISOString().slice(0, 16);
 
 //? add task
 addBtn.addEventListener("click", (e) => {
-  const taskTime = getTaskDate(sessionTime, sessionNum);
+  if (isFormValidated) {
+    const taskTime = getTaskDate();
 
-  const newTask = myTasks.addTask(
-    tasksList.length + 1,
-    titleField.value,
-    sessionNum.innerText,
-    taskTime.taskFullDate,
-    taskTime.taskDay,
-    taskTime.startTime,
-    taskTime.endTime,
-    chosenCategory,
-    noteContent.value
-  );
-  tasksList = myTasks.getAllTasks();
-  createTaskBox(newTask);
+    const newTask = myTasks.addTask(
+      tasksList.length + 1,
+      titleField.value,
+      sessionNum.innerText,
+      taskTime.taskFullDate,
+      taskTime.taskDay,
+      taskTime.startTime,
+      taskTime.endTime,
+      chosenCategory,
+      noteContent.value
+    );
+    tasksList = myTasks.getAllTasks();
+    createTaskBox(newTask);
 
-  displayUserProgress(progressObj, tasksList);
+    displayUserProgress(progressObj, tasksList);
 
-  // ?reset data
-  tasksContainer.children[0].classList.add("d-none");
-  tasksContainer.children[0].classList.remove("d-flex");
-  counter = 1;
-  closeModal(addTaskModal);
-  clearTaskDate(
-    titleField,
-    sessionTime,
-    sessionNum,
-    addNoteBtn,
-    noteContent,
-    categoryItems
-  );
+    // ?reset data
+    startingTxt.classList.add("d-none");
+    startingTxt.classList.remove("d-flex");
+    counter = 1;
+    closeModal(addTaskModal);
+    clearTaskDate();
+  } else {
+    validationTxt.classList.remove("d-none");
+  }
 });
 
 // //* close task add modal
 cancelTaskAddBtn.addEventListener("click", (e) => {
   closeModal(addTaskModal);
-  clearTaskDate(
-    titleField,
-    sessionTime,
-    sessionNum,
-    addNoteBtn,
-    noteContent,
-    categoryItems
-  );
+  clearTaskDate();
   counter = 1;
 });
 
 addTaskModal.addEventListener("click", (e) => {
   closeModal(addTaskModal);
-  clearTaskDate(
-    titleField,
-    sessionTime,
-    sessionNum,
-    addNoteBtn,
-    noteContent,
-    categoryItems
-  );
+  clearTaskDate();
   counter = 1;
 });
 
@@ -277,38 +273,35 @@ showTaskModal.children[0].addEventListener("click", (e) => {
 
 // ?edit & display updated data data
 editBtn.addEventListener("click", (e) => {
-  const taskTime = getTaskDate(sessionTime, sessionNum);
-  const updatedTask = myTasks.editTask(
-    selectedTask.id,
-    titleField.value,
-    sessionNum.innerText,
-    taskTime.taskFullDate,
-    taskTime.taskDay,
-    taskTime.startTime,
-    taskTime.endTime,
-    chosenCategory.category,
-    chosenCategory.icon,
-    noteContent.value
-  );
-  tasksList = myTasks.getAllTasks();
+  if (isFormValidated) {
+    const taskTime = getTaskDate();
+    const updatedTask = myTasks.editTask(
+      selectedTask.id,
+      titleField.value,
+      sessionNum.innerText,
+      taskTime.taskFullDate,
+      taskTime.taskDay,
+      taskTime.startTime,
+      taskTime.endTime,
+      chosenCategory.category,
+      chosenCategory.icon,
+      noteContent.value
+    );
+    tasksList = myTasks.getAllTasks();
 
-  // ? display updated data
-  displayUpdatedData(updatedTask);
-  // ?reset data
-  tasksContainer.children[0].classList.add("d-none");
-  tasksContainer.children[0].classList.remove("d-flex");
-  counter = 1;
-  closeModal(addTaskModal);
-  clearTaskDate(
-    titleField,
-    sessionTime,
-    sessionNum,
-    addNoteBtn,
-    noteContent,
-    categoryItems
-  );
+    // ? display updated data
+    displayUpdatedData(updatedTask);
+    // ?reset data
+    startingTxt.classList.add("d-none");
+    startingTxt.classList.remove("d-flex");
+    counter = 1;
+    closeModal(addTaskModal);
+    clearTaskDate();
 
-  updateTimerData(updatedTask);
+    updateTimerData(updatedTask, tasksList.length);
+  } else {
+    validationTxt.classList.remove("d-none");
+  }
 });
 
 // ? confirm deletion
@@ -317,39 +310,36 @@ confirmDeleteBtn.addEventListener("click", (e) => {
   if (deleteTaskModal.getAttribute("data-number") == "one") {
     myTasks.deleteTask(selectedTask.id);
     tasksList = myTasks.getAllTasks();
-    emptyTaskContainer(tasksContainer);
-    displayTasks(tasksList.length, tasksList, tasksContainer);
+    emptyTaskContainer();
+    displayTasks(tasksList.length, tasksList);
   } else if (deleteTaskModal.getAttribute("data-number") == "all") {
     myTasks.deleteAllTasks();
     tasksList = myTasks.getAllTasks();
-    emptyTaskContainer(tasksContainer);
+    emptyTaskContainer();
     deleteTaskModal.setAttribute("data-number", "one");
   } else if (deleteTaskModal.getAttribute("data-number") == "completed") {
     myTasks.deleteCompletedTasks();
     tasksList = myTasks.getAllTasks();
-    emptyTaskContainer(tasksContainer);
-    displayTasks(tasksList.length, tasksList, tasksContainer);
+    emptyTaskContainer();
+    displayTasks(tasksList.length, tasksList);
     deleteTaskModal.setAttribute("data-number", "one");
   }
   displayUserProgress(progressObj, tasksList);
   closeModal(deleteTaskModal);
   selectedTask = null;
-  updateTimerData(selectedTask);
+  updateTimerData(selectedTask, tasksList.length);
 });
 
 // *search for a task by title
 searchField.addEventListener("input", (e) => {
   const foundTasks = myTasks.searchTask(searchField.value);
-  emptyTaskContainer(tasksContainer);
-  displayTasks(foundTasks.length, foundTasks, tasksContainer);
+  emptyTaskContainer();
+  displayTasks(foundTasks.length, foundTasks);
 
   if (!foundTasks.length && tasksList.length) {
-    tasksContainer.children[0].querySelector("p").innerText =
-      "No Tasks Found 😔";
+    startingTxt.querySelector("p").innerText = "No Tasks Found 😔";
   } else {
-    tasksContainer.children[0].querySelector(
-      "p"
-    ).innerHTML = `You have No Tasks <br/>
+    startingTxt.querySelector("p").innerHTML = `You have No Tasks <br/>
                     start adding a new one 😊`;
   }
 });
@@ -358,8 +348,8 @@ searchField.addEventListener("input", (e) => {
 completeAllTasksBtn.addEventListener("click", (e) => {
   myTasks.completeAllTasks();
   tasksList = myTasks.getAllTasks();
-  emptyTaskContainer(tasksContainer);
-  displayTasks(tasksList.length, tasksList, tasksContainer);
+  emptyTaskContainer();
+  displayTasks(tasksList.length, tasksList);
   // *update user progress
   displayUserProgress(progressObj, tasksList);
 });
@@ -404,7 +394,7 @@ tasksContainer.addEventListener("click", (e) => {
 
     selectedTask = myTasks.retrieveTask(box.id.split("-")[2]);
     box.style.outline = "2px solid rgba(0, 0, 0, 0.5)";
-    updateTimerData(selectedTask);
+    updateTimerData(selectedTask, tasksList.length);
   }
 });
 
@@ -548,7 +538,7 @@ replayBreakBtn.addEventListener("click", () => {
 });
 
 // & move to next session in ongoing timer
-updateTimerData(selectedTask);
+updateTimerData(selectedTask, tasksList.length);
 nextSessionBtn.addEventListener("click", () => {
   //* stop timer of previous session
   stopOtherWorkingTimer(ongoingTimer, playOngoingBtn, stopOngoingBtn);
@@ -573,7 +563,7 @@ nextSessionBtn.addEventListener("click", () => {
     !selectedTask.isCompleted
   ) {
     // * display celebration msg
-    displayCelebrationMsg(selectedTask);
+    displayCelebrationMsg();
     myTasks.completeTask(selectedTask.id);
     document
       .querySelector(`#task-box-${selectedTask.id} .circle`)
@@ -588,5 +578,13 @@ nextSessionBtn.addEventListener("click", () => {
       : "Complete Task";
     nextSessionBtn.style.cssText =
       "color:grey; border:2px solid grey; cursor:not-allowed";
+
+    selectedTask.isCompleted
+      ? document
+          .querySelector(`#task-box-${selectedTask.id} li.edit-task-btn`)
+          .classList.add("d-none")
+      : document
+          .querySelector(`#task-box-${selectedTask.id} li.edit-task-btn`)
+          .classList.remove("d-none");
   }
 });

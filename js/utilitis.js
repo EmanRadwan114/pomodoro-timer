@@ -8,8 +8,11 @@ import {
   sessionNum,
   sessionNumericals,
   sessionTime,
+  startingTxt,
+  tasksContainer,
   taskTitle,
   titleField,
+  validationTxt,
   yaySound,
 } from "./main.js";
 
@@ -106,22 +109,22 @@ export function closeModal(modal) {
   document.querySelector(".container").classList.remove("d-none");
 }
 
-export function showAndHideTaskNotes(noteField, showBtn) {
-  noteField.classList.toggle("d-none");
-  showBtn.children[0].classList.toggle("fa-plus");
-  showBtn.children[0].classList.toggle("fa-minus");
+export function showAndHideTaskNotes() {
+  noteContent.classList.toggle("d-none");
+  addNoteBtn.children[0].classList.toggle("fa-plus");
+  addNoteBtn.children[0].classList.toggle("fa-minus");
 }
 
-export function showTaskNotes(noteField, showBtn) {
-  noteField.classList.remove("d-none");
-  showBtn.children[0].classList.remove("fa-plus");
-  showBtn.children[0].classList.add("fa-minus");
+export function showTaskNotes() {
+  noteContent.classList.remove("d-none");
+  addNoteBtn.children[0].classList.remove("fa-plus");
+  addNoteBtn.children[0].classList.add("fa-minus");
 }
 
-export function hideTaskNotes(noteField, showBtn) {
-  noteField.classList.add("d-none");
-  showBtn.children[0].classList.add("fa-plus");
-  showBtn.children[0].classList.remove("fa-minus");
+export function hideTaskNotes() {
+  noteContent.classList.add("d-none");
+  addNoteBtn.children[0].classList.add("fa-plus");
+  addNoteBtn.children[0].classList.remove("fa-minus");
 }
 
 export function switchtoAddMode(addBtn, editBtn) {
@@ -135,7 +138,7 @@ export function switchtoEditMode(addBtn, editBtn) {
 }
 
 export function chooseCategory(categoryItems) {
-  const category = {};
+  const category = { category: "work", icon: "fa-solid fa-briefcase" };
   categoryItems.forEach((item) => {
     item.addEventListener("click", () => {
       categoryItems.forEach((categ) => {
@@ -149,20 +152,27 @@ export function chooseCategory(categoryItems) {
 
   return category;
 }
+export let isFormValidated = null;
+export function validateForm() {
+  titleField.addEventListener("input", (e) => {
+    if (!e.target.value || e.target.value.length < 3) {
+      e.target.nextElementSibling.classList.remove("d-none");
+      isFormValidated = false;
+    } else {
+      e.target.nextElementSibling.classList.add("d-none");
+      isFormValidated = true;
+    }
+  });
+}
 
-export function clearTaskDate(
-  title,
-  taskTime,
-  sessionNum,
-  addNoteBtn,
-  noteContent,
-  categoryItems
-) {
-  title.value = "";
-  taskTime.value = "";
+export function clearTaskDate() {
+  titleField.value = "";
+  validationTxt.classList.add("d-none");
+  titleField.nextElementSibling.classList.add("d-none");
+  sessionTime.value = "";
   sessionNum.innerText = "1";
   noteContent.value = "";
-  hideTaskNotes(noteContent, addNoteBtn);
+  hideTaskNotes();
   categoryItems.forEach((categ) => {
     categ.style.outline = "";
   });
@@ -187,9 +197,9 @@ export function createTaskBox(task) {
   col1.appendChild(circleDiv);
 
   const icon = document.createElement("i");
-  icon.className = `fa-solid fa-check txt-color-medium-light ${
+  icon.className = `fa-solid fa-check txt-color-medium-light p-1 ${
     task.isCompleted ? "uncomplete-task-btn" : "complete-task-btn"
-  } w-100 text-center p-1`;
+  } w-100 text-center`;
   icon.setAttribute("data-identity", task.id);
   circleDiv.appendChild(icon);
 
@@ -266,23 +276,23 @@ export function createTaskBox(task) {
   taskDiv.appendChild(col3);
 
   // Append the task box to the container
-  container.appendChild(taskDiv);
+  container.prepend(taskDiv);
 }
 
-export function displayTasks(tasksLength, taskList, tasksContainer) {
+export function displayTasks(tasksLength, taskList) {
   if (tasksLength == 0) {
-    tasksContainer.children[0].classList.remove("d-none");
-    tasksContainer.children[0].classList.add("d-flex");
+    startingTxt.classList.remove("d-none");
+    startingTxt.classList.add("d-flex");
   } else {
-    tasksContainer.children[0].classList.add("d-none");
-    tasksContainer.children[0].classList.remove("d-flex");
+    startingTxt.classList.add("d-none");
+    startingTxt.classList.remove("d-flex");
     taskList.forEach((task) => {
       createTaskBox(task);
     });
   }
 }
 
-export function getTaskDate(sessionTime, sessionNum) {
+export function getTaskDate() {
   let taskTime = sessionTime.value ? new Date(sessionTime.value) : new Date();
   const taskFullDate = sessionTime.value
     ? sessionTime.value
@@ -371,7 +381,7 @@ export function displayTaskInfoForEdit(targetTask) {
     }
   });
 
-  showTaskNotes(noteContent, addNoteBtn);
+  showTaskNotes();
 }
 
 export function displayUpdatedData(updatedTask) {
@@ -391,7 +401,7 @@ export function displayUpdatedData(updatedTask) {
     updatedTask.endTime;
 }
 
-export function emptyTaskContainer(tasksContainer) {
+export function emptyTaskContainer() {
   tasksContainer.innerHTML = ` 
                 <div
                   class="d-flex align-center center text-center vh-25 start-txt"
@@ -403,7 +413,7 @@ export function emptyTaskContainer(tasksContainer) {
                 </div>`;
 }
 
-export function updateTimerData(selectedTask) {
+export function updateTimerData(selectedTask, tasksListLength) {
   if (selectedTask) {
     sessionNumericals.classList.remove("v-hidden");
     taskTitle.classList.remove("v-hidden");
@@ -422,11 +432,11 @@ export function updateTimerData(selectedTask) {
 
   sessionNumericals.children[0].innerText = selectedTask?.currentSession;
   sessionNumericals.children[1].innerText = selectedTask?.sessionNumber;
-  taskTitle.children[0].innerText = selectedTask?.id;
+  taskTitle.children[0].innerText = tasksListLength - selectedTask?.id + 1;
   taskTitle.children[1].innerText = selectedTask?.title;
 }
 
-export function displayCelebrationMsg(selectedTask) {
+export function displayCelebrationMsg() {
   yaySound.play();
   // Get the user's scroll position
   const x = window.scrollX + window.innerWidth / 2 - 25; // Center horizontally

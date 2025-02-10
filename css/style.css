@@ -87,6 +87,7 @@ textarea::placeholder,
 }
 #tasks .tasks-container {
   height: 100%;
+  padding-bottom: 60px;
 }
 
 #tasks .search label {
@@ -148,7 +149,7 @@ textarea::placeholder,
 }
 
 #add-task {
-  bottom: 10px;
+  bottom: 11px;
   left: 20px;
   right: 20px;
 }
@@ -176,10 +177,10 @@ textarea::placeholder,
 
 /* ^----------------- 7 - add task modal------------------- */
 #add-task-modal div.cell {
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
-#add-task-modal input[type="text"] + p {
+#add-task-modal .validate-text {
   color: var(--red);
 }
 
@@ -255,14 +256,7 @@ textarea::placeholder,
 .my-scrollable-div {
   overflow-y: visible;
 }
-#tasks .container-height {
-  min-height: 50vh;
-}
 @media screen and (min-width: 992px) {
-  #tasks .container-height {
-    height: 75vh;
-  }
-
   #tasks-container > .start-txt {
     position: absolute;
     left: 0;

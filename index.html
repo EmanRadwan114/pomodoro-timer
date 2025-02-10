@@ -40,104 +40,100 @@
       <!-- ^ -----------------main----------------- -->
       <main class="row g-3 space-between w-100">
         <!-- ^ -----------------tasks section----------------- -->
-        <section id="tasks" class="col-12 col-lg-6 relative">
+        <section id="tasks" class="col-12 col-lg-6 relative pt-0">
           <div class="section-style pt-0 tasks-container my-scrollable-div">
-            <div class="container-height">
-              <div class="list-header">
-                <header class="row gy-3 pt-4 txt-capitalize bg-light">
-                  <div class="col-12 col-md-6">
-                    <div class="text-center text-md-start">
-                      <h2 class="fs-2">
-                        My Tasks
-                        <span class="txt-color-primary fs-normal"
-                          >(6 Tasks)</span
-                        >
-                      </h2>
-                    </div>
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <div class="tasks-features row align-center">
-                      <div class="col-11">
-                        <div class="search relative">
-                          <input
-                            type="text"
-                            name="search-field"
-                            id="search-field"
-                            placeholder="Search a Task"
-                            class="w-100 border-secondary radius-small pt-1 pb-1 ps-2 pe-2 bg-light"
-                          />
-                          <label
-                            for="search-field"
-                            class="absolute p-1 txt-color-primary"
-                            ><i class="fa-solid fa-magnifying-glass cursor"></i
-                          ></label>
-                        </div>
-                      </div>
-                      <div class="col-1">
-                        <div id="menu" class="relative text-end">
-                          <i
-                            class="fa-solid fa-ellipsis-vertical menu-bullets cursor p-2 txt-color-dark fs-2"
-                          ></i>
-                          <ul
-                            class="menu-items main-menu absolute text-start radius-small bg-color-secondary-opaque txt-color-light"
-                          >
-                            <li
-                              class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
-                              id="complete-all-tasks"
-                            >
-                              Complete All Tasks
-                            </li>
-                            <li
-                              class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
-                              id="delete-completed-tasks"
-                            >
-                              Delete Completed Tasks
-                            </li>
-                            <li
-                              class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
-                              id="delete-all-tasks"
-                            >
-                              Delete All Tasks
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </header>
-                <hr />
-              </div>
-              <!-- ^ -----------------task box----------------- -->
-              <section id="tasks-container" class="relative h-75">
-                <div
-                  class="align-center center d-none text-center vh-25 start-txt"
-                >
-                  <div class="txt-capitalize fs-3 mt-5 mb-5">
-                    <p class="mb-2">
-                      You have No Tasks <br />
-                      start adding a new one 😊
-                    </p>
+            <div class="list-header">
+              <header class="row gy-3 pt-4 txt-capitalize bg-light">
+                <div class="col-12 col-md-6">
+                  <div class="text-center text-md-start">
+                    <h2 class="fs-2">
+                      My Tasks
+                      <span class="txt-color-primary fs-normal">(6 Tasks)</span>
+                    </h2>
                   </div>
                 </div>
-              </section>
-              <!-- ^ -----------------add task btn----------------- -->
-
+                <div class="col-12 col-md-6">
+                  <div class="tasks-features row align-center">
+                    <div class="col-11">
+                      <div class="search relative">
+                        <input
+                          type="text"
+                          name="search-field"
+                          id="search-field"
+                          placeholder="Search a Task"
+                          class="w-100 border-secondary radius-small pt-1 pb-1 ps-2 pe-2 bg-light"
+                        />
+                        <label
+                          for="search-field"
+                          class="absolute p-1 txt-color-primary"
+                          ><i class="fa-solid fa-magnifying-glass cursor"></i
+                        ></label>
+                      </div>
+                    </div>
+                    <div class="col-1">
+                      <div id="menu" class="relative text-end">
+                        <i
+                          class="fa-solid fa-ellipsis-vertical menu-bullets cursor p-2 txt-color-dark fs-2"
+                        ></i>
+                        <ul
+                          class="menu-items main-menu absolute text-start radius-small bg-color-secondary-opaque txt-color-light"
+                        >
+                          <li
+                            class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
+                            id="complete-all-tasks"
+                          >
+                            Complete All Tasks
+                          </li>
+                          <li
+                            class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
+                            id="delete-completed-tasks"
+                          >
+                            Delete Completed Tasks
+                          </li>
+                          <li
+                            class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
+                            id="delete-all-tasks"
+                          >
+                            Delete All Tasks
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </header>
+              <hr />
+            </div>
+            <!-- ^ -----------------task box----------------- -->
+            <section id="tasks-container" class="relative h-75">
               <div
-                id="add-task"
-                class="absolute pe-5 ps-3 bg-light pb-4 radius-small"
+                class="align-center center d-none text-center vh-25 start-txt"
               >
-                <hr />
-                <button
-                  class="add-btn mt-3 w-100 btn text-center border-primary radius-small txt-color-light bg-color-primary trans-primary"
-                >
-                  <i class="fa-solid fa-plus"></i> Add Task
-                </button>
+                <div class="txt-capitalize fs-3 mt-5 mb-5">
+                  <p class="mb-2">
+                    You have No Tasks <br />
+                    start adding a new one 😊
+                  </p>
+                </div>
               </div>
+            </section>
+            <!-- ^ -----------------add task btn----------------- -->
+
+            <div
+              id="add-task"
+              class="absolute pe-5 ps-3 bg-light pb-4 radius-small me-2"
+            >
+              <hr />
+              <button
+                class="add-btn mt-3 w-100 btn text-center border-primary radius-small txt-color-light bg-color-primary trans-primary"
+              >
+                <i class="fa-solid fa-plus"></i> Add Task
+              </button>
             </div>
           </div>
         </section>
 
-        <section id="right-side" class="col-12 col-lg-6">
+        <section id="right-side" class="col-12 col-lg-6 mb-0">
           <!-- ^ -----------------daily progress section----------------- -->
           <section id="progress" class="mb-3">
             <div class="section-style">
@@ -202,9 +198,11 @@
                     class="range absolute radius-rounded bg-color-primary-dark"
                   ></div>
                 </div>
-                <p class="task-info mt-5 mb-5 txt-color-dark v-hidden">
-                  #<span class="order">3</span> -
-                  <span class="title">Morning Exercise</span>
+                <p
+                  class="task-info mt-5 mb-5 txt-color-dark v-hidden txt-capitalize fs-3 fw-3"
+                >
+                  #<span class="order fs-3 fw-3"></span> -
+                  <span class="title fs-3 fw-3"></span>
                 </p>
 
                 <div class="timer-controls row gx-3 center mt-6">
@@ -293,17 +291,27 @@
     >
       <div class="col-12 col-sm-10 col-md-8 col-lg-6">
         <div class="modal-content section-style relative p-5">
+          <p
+            class="txt-capitalize fs-3 mb-1 d-none validate-text text-center"
+            id="validation-txt"
+          >
+            Please Fill the required data
+          </p>
           <div class="cell title">
-            <label for="task-title">Add Title</label>
+            <label for="task-title"
+              >Add Title <span class="validate-text">*</span></label
+            >
             <input
               type="text"
               name="task-title"
               id="task-title"
               placeholder="Write Down Your Task Title"
               required
-              class="w-100 mt-3 mb- border-secondary radius-small pt-2 pb-2 ps-3 pe-3 bg-light"
+              class="w-100 mt-3 border-secondary radius-small pt-2 pb-2 ps-3 pe-3 bg-light"
             />
-            <p class="validate-text mt-2 d-none">Title is required</p>
+            <p class="validate-text mt-2 d-none">
+              Title is required with minimum of 3 characters
+            </p>
           </div>
 
           <div class="cell categories">
