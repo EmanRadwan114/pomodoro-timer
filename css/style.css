@@ -1,0 +1,295 @@
+/* ^----------------- 1- General Styles------------------- */
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-bg-color: #f1e7c9;
+  --secondary-bg-color: #317b8a;
+  --primary-color: #124f5b;
+  --secondary-color: white;
+  --tertiary-color: rgb(203, 96, 64);
+  --text-color: #312d2c;
+  --red: rgb(164, 5, 5);
+  font-size: 16px;
+}
+
+body {
+  position: relative;
+  background-image: linear-gradient(
+    135deg,
+    var(--primary-bg-color),
+    var(--secondary-bg-color)
+  );
+  background-attachment: fixed;
+  color: var(--text-color);
+}
+
+body,
+button,
+a,
+input[type="text"]::placeholder,
+textarea::placeholder,
+#add-task-modal #session-time::placeholder,
+label,
+span {
+  font-family: "Courgette", serif;
+  font-style: normal;
+  font-size: 16px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+/* ^----------------- 2- common Styles------------------- */
+#add-task-modal,
+#delete-task-modal,
+#show-task-details {
+  padding: 50px 10px;
+}
+
+input[type="text"]:focus-within,
+textarea:focus-within,
+#add-task-modal #session-time:focus-within {
+  outline: none;
+}
+
+input[type="text"]::placeholder,
+textarea::placeholder,
+#add-task-modal #session-time::placeholder {
+  font-size: 0.9rem;
+}
+
+#add-task .add-btn:hover,
+#add-task .edit-btn:hover,
+.play-btn:hover,
+.stop-btn:hover {
+  background-color: transparent;
+  border: 2px solid var(--tertiary-color);
+  color: var(--tertiary-color);
+}
+
+#delete-task-modal .modal-content,
+#add-task-modal .modal-content,
+#show-task-details .modal-content {
+  box-shadow: none;
+}
+
+/* ^----------------- 4.1- tasks section------------------- */
+#tasks .tasks-container {
+  height: 100%;
+  padding-bottom: 90px;
+}
+
+#tasks .search label {
+  right: 3%;
+  top: 2px;
+}
+
+#menu i {
+  transition: color 300ms;
+}
+
+#menu ul {
+  position: absolute;
+  right: 10%;
+  top: 100%;
+  min-width: 200px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 500ms;
+  z-index: 10;
+}
+
+#menu:hover i {
+  color: var(--tertiary-color);
+}
+
+#menu:hover .menu-items {
+  visibility: visible;
+  opacity: 1;
+}
+
+.menu-items li:hover {
+  background-color: var(--primary-bg-color);
+  color: var(--text-color);
+}
+
+@media screen and (max-width: 991.5px) {
+  #tasks {
+    order: 1;
+  }
+}
+
+/* ^----------------- 4.1.1 - task box------------------- */
+.circle {
+  width: 25px;
+  height: 25px;
+}
+
+#tasks-container .menu-items {
+  min-width: 170px;
+  /* transform: translateY(-50%); Moves menu slightly above */
+}
+
+#tasks-container .box {
+  transition: box-shadow 300ms;
+  min-height: 15vh;
+}
+#tasks-container .box:hover {
+  box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.5);
+}
+
+#add-task {
+  bottom: 10px;
+  left: 20px;
+  right: 20px;
+}
+
+/* ^----------------- 6 - timer section------------------- */
+.range-container {
+  height: 6px;
+  overflow: hidden;
+  z-index: 0;
+}
+.range {
+  height: 6px;
+  left: 0;
+  top: 0;
+  width: 0%;
+  height: 100%;
+}
+
+.re-play:hover,
+.next-step:hover {
+  color: var(--tertiary-color);
+  background-color: transparent;
+  border: 2px solid var(--tertiary-color);
+}
+
+/* ^----------------- 7 - add task modal------------------- */
+#add-task-modal div.cell {
+  margin-bottom: 40px;
+}
+
+#add-task-modal input[type="text"] + p {
+  color: var(--red);
+}
+
+#add-task-modal .item:nth-child(1):hover,
+#add-task-modal .item:nth-child(3):hover,
+#add-task-modal .item:nth-child(5):hover {
+  color: var(--tertiary-color);
+}
+
+#add-task-modal .item:nth-child(2):hover,
+#add-task-modal .item:nth-child(4):hover {
+  color: var(--primary-color);
+}
+
+#add-task-modal .item:hover {
+  background-color: transparent;
+}
+
+#add-task-modal .add-note button:hover {
+  background-color: transparent;
+  border: 2px solid var(--tertiary-color);
+  color: var(--tertiary-color);
+}
+
+#add-task-modal textarea {
+  resize: vertical;
+}
+#add-task-modal .note::after {
+  content: "";
+  display: block;
+  padding-bottom: 30px;
+}
+
+#add-task-modal .modal-btns .cancel-btn:hover {
+  background-color: var(--tertiary-color);
+  color: var(--secondary-color);
+}
+
+#add-task-modal .modal-btns .add-btn:hover,
+#add-task-modal .modal-btns .edit-btn:hover {
+  background-color: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+#add-task-modal .num > p,
+#add-task-modal #task-title,
+#add-task-modal #session-time {
+  background-color: white;
+}
+
+/* ^----------------- 8 - show task details modal------------------- */
+#show-task-details .close-modal-btn:hover {
+  background-color: var(--tertiary-color);
+  border: 2px solid var(--tertiary-color);
+  color: var(--secondary-color);
+}
+
+#show-task-details .task-img i {
+  font-size: 40px;
+}
+
+/* ^----------------- 9 - delete modal------------------- */
+#delete-task-modal .cancel-btn {
+  border: 2px solid var(--red);
+}
+
+#delete-task-modal .delete-btn {
+  background-color: var(--red);
+}
+
+/* ^----------------- scroll bar------------------- */
+.my-scrollable-div {
+  overflow-y: visible;
+}
+
+#tasks .container-height {
+  min-height: 50vh;
+}
+@media screen and (min-width: 992px) {
+  #tasks .container-height {
+    height: 50vh;
+  }
+  #tasks .tasks-container {
+    overflow: auto;
+    height: 100%;
+    padding-bottom: 90px;
+  }
+
+  .my-scrollable-div {
+    overflow-y: auto;
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: var(--tertiary-color) #d7cecc; /* For Firefox */
+  }
+
+  /* Custom scrollbar for WebKit-based browsers (Chrome, Safari, Edge) */
+  .my-scrollable-div::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  .my-scrollable-div::-webkit-scrollbar-track {
+    background: #d7cecc;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .my-scrollable-div::-webkit-scrollbar-thumb {
+    cursor: pointer;
+    background: var(--tertiary-color);
+    border-radius: 8px;
+  }
+}
+
+/* ^----------------- celebration------------------- */
+#celebration p {
+  box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.7);
+}
