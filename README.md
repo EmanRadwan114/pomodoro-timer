@@ -12,7 +12,7 @@ This project is a web-based Pomodoro Timer that allows you to:
 - Track your productivity sessions.
 
 ## 🚀 Live Demo
-You can try the app here: [[Pomodoro Timer Demo](https://emanradwan114.github.io/pomodoro-timer/)](#) *(replace with your deployed link if available)*.
+You can try the app here: [Pomodoro Timer Demo](https://emanradwan114.github.io/pomodoro-timer/)(#)
 
 ## 🛠 Features
 - **Customizable Timer**: Set your own work and break durations.
