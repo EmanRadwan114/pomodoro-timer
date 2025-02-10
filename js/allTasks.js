@@ -51,13 +51,12 @@ export default class TasksContainer {
 
   completeTask(id) {
     this.#tasksContainer = this.getAllTasks();
-    const tasksAfterComplete = this.#tasksContainer.map((elem) => {
+    this.#tasksContainer = this.#tasksContainer.map((elem) => {
       if (elem.id === +id) {
         elem.isCompleted = !elem.isCompleted;
       }
       return elem;
     });
-    this.#tasksContainer = tasksAfterComplete;
     this.saveAllTasks();
   }
 
@@ -76,7 +75,7 @@ export default class TasksContainer {
     let updatedTask = null;
     this.#tasksContainer = this.getAllTasks();
 
-    const tasksAfterEdit = this.#tasksContainer.map((elem) => {
+    this.#tasksContainer = this.#tasksContainer.map((elem) => {
       if (elem.id === +id) {
         elem.title = title;
         elem.sessionNumber = sessionNum;
@@ -91,18 +90,15 @@ export default class TasksContainer {
       }
       return elem;
     });
-
-    this.#tasksContainer = tasksAfterEdit;
     this.saveAllTasks();
     return updatedTask;
   }
 
   deleteTask(id) {
     this.#tasksContainer = this.getAllTasks();
-    const tasksAfterDelete = this.#tasksContainer.filter((elem) => {
+    this.#tasksContainer = this.#tasksContainer.filter((elem) => {
       return elem.id !== +id;
     });
-    this.#tasksContainer = tasksAfterDelete;
     this.saveAllTasks();
   }
 
@@ -122,6 +118,15 @@ export default class TasksContainer {
     this.#tasksContainer = this.#tasksContainer.map((task) => {
       task.isCompleted = true;
       return task;
+    });
+
+    this.saveAllTasks();
+  }
+  deleteCompletedTasks() {
+    this.#tasksContainer = this.getAllTasks();
+
+    this.#tasksContainer = this.#tasksContainer.filter((task) => {
+      return task.isCompleted == false;
     });
 
     this.saveAllTasks();

@@ -79,9 +79,14 @@ textarea::placeholder,
 }
 
 /* ^----------------- 4.1- tasks section------------------- */
+#tasks .list-header {
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 99;
+}
 #tasks .tasks-container {
   height: 100%;
-  padding-bottom: 90px;
 }
 
 #tasks .search label {
@@ -96,8 +101,8 @@ textarea::placeholder,
 #menu ul {
   position: absolute;
   right: 10%;
-  top: 100%;
-  min-width: 200px;
+  top: 95%;
+  min-width: 220px;
   visibility: hidden;
   opacity: 0;
   transition: opacity 500ms;
@@ -132,7 +137,6 @@ textarea::placeholder,
 
 #tasks-container .menu-items {
   min-width: 170px;
-  /* transform: translateY(-50%); Moves menu slightly above */
 }
 
 #tasks-container .box {
@@ -251,18 +255,23 @@ textarea::placeholder,
 .my-scrollable-div {
   overflow-y: visible;
 }
-
 #tasks .container-height {
   min-height: 50vh;
 }
 @media screen and (min-width: 992px) {
   #tasks .container-height {
-    height: 50vh;
+    height: 75vh;
+  }
+
+  #tasks-container > .start-txt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 15px;
+    right: 0;
   }
   #tasks .tasks-container {
     overflow: auto;
-    height: 100%;
-    padding-bottom: 90px;
   }
 
   .my-scrollable-div {
@@ -290,6 +299,10 @@ textarea::placeholder,
 }
 
 /* ^----------------- celebration------------------- */
+#celebration {
+  transition: opacity 500ms;
+}
+
 #celebration p {
   box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.7);
 }

@@ -41,87 +41,99 @@
       <main class="row g-3 space-between w-100">
         <!-- ^ -----------------tasks section----------------- -->
         <section id="tasks" class="col-12 col-lg-6 relative">
-          <div class="section-style tasks-container my-scrollable-div">
+          <div class="section-style pt-0 tasks-container my-scrollable-div">
             <div class="container-height">
-              <header class="row gy-3 mb-4 txt-capitalize align-center">
-                <div class="col-12 col-md-6">
-                  <div class="text-center text-md-start">
-                    <h2 class="fs-2">
-                      My Tasks
-                      <span class="txt-color-primary fs-normal">(6 Tasks)</span>
-                    </h2>
-                  </div>
-                </div>
-                <div class="col-12 col-md-6">
-                  <div class="tasks-features row align-center">
-                    <div class="col-11">
-                      <div class="search relative">
-                        <input
-                          type="text"
-                          name="search-field"
-                          id="search-field"
-                          placeholder="Search a Task"
-                          class="w-100 border-secondary radius-small pt-1 pb-1 ps-2 pe-2 bg-light"
-                        />
-                        <label
-                          for="search-field"
-                          class="absolute p-1 txt-color-primary"
-                          ><i class="fa-solid fa-magnifying-glass cursor"></i
-                        ></label>
-                      </div>
-                    </div>
-                    <div class="col-1">
-                      <div id="menu" class="relative text-end">
-                        <i
-                          class="fa-solid fa-ellipsis-vertical menu-bullets cursor p-2 txt-color-dark fs-2"
-                        ></i>
-                        <ul
-                          class="menu-items absolute text-start radius-small bg-color-secondary-opaque txt-color-light"
+              <div class="list-header">
+                <header class="row gy-3 pt-4 txt-capitalize bg-light">
+                  <div class="col-12 col-md-6">
+                    <div class="text-center text-md-start">
+                      <h2 class="fs-2">
+                        My Tasks
+                        <span class="txt-color-primary fs-normal"
+                          >(6 Tasks)</span
                         >
-                          <li
-                            class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
-                            id="complete-all-tasks"
+                      </h2>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="tasks-features row align-center">
+                      <div class="col-11">
+                        <div class="search relative">
+                          <input
+                            type="text"
+                            name="search-field"
+                            id="search-field"
+                            placeholder="Search a Task"
+                            class="w-100 border-secondary radius-small pt-1 pb-1 ps-2 pe-2 bg-light"
+                          />
+                          <label
+                            for="search-field"
+                            class="absolute p-1 txt-color-primary"
+                            ><i class="fa-solid fa-magnifying-glass cursor"></i
+                          ></label>
+                        </div>
+                      </div>
+                      <div class="col-1">
+                        <div id="menu" class="relative text-end">
+                          <i
+                            class="fa-solid fa-ellipsis-vertical menu-bullets cursor p-2 txt-color-dark fs-2"
+                          ></i>
+                          <ul
+                            class="menu-items main-menu absolute text-start radius-small bg-color-secondary-opaque txt-color-light"
                           >
-                            Complete All Tasks
-                          </li>
-                          <li
-                            class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
-                            id="delete-all-tasks"
-                          >
-                            Delete All Tasks
-                          </li>
-                        </ul>
+                            <li
+                              class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
+                              id="complete-all-tasks"
+                            >
+                              Complete All Tasks
+                            </li>
+                            <li
+                              class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
+                              id="delete-completed-tasks"
+                            >
+                              Delete Completed Tasks
+                            </li>
+                            <li
+                              class="cursor m-4 radius-small pt-1 pb-1 pe-3 ps-3"
+                              id="delete-all-tasks"
+                            >
+                              Delete All Tasks
+                            </li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </header>
-              <hr />
+                </header>
+                <hr />
+              </div>
               <!-- ^ -----------------task box----------------- -->
-              <section id="tasks-container">
+              <section id="tasks-container" class="relative h-75">
                 <div
-                  class="d-flex align-center center d-none text-center absolute position-0"
+                  class="align-center center d-none text-center vh-25 start-txt"
                 >
                   <div class="txt-capitalize fs-3 mt-5 mb-5">
-                    <p class="mb-2">You have No Tasks</p>
-                    <p>start adding a new one 😊</p>
+                    <p class="mb-2">
+                      You have No Tasks <br />
+                      start adding a new one 😊
+                    </p>
                   </div>
                 </div>
               </section>
               <!-- ^ -----------------add task btn----------------- -->
-               <div>
+
               <div
                 id="add-task"
                 class="absolute pe-5 ps-3 bg-light pb-4 radius-small"
               >
-              <hr />
-              <button
-              class="add-btn mt-3 w-100 btn text-center border-primary radius-small txt-color-light bg-color-primary trans-primary"
-              >
-              <i class="fa-solid fa-plus"></i> Add Task
-            </button>
-          </div>
-        </div>
+                <hr />
+                <button
+                  class="add-btn mt-3 w-100 btn text-center border-primary radius-small txt-color-light bg-color-primary trans-primary"
+                >
+                  <i class="fa-solid fa-plus"></i> Add Task
+                </button>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -130,7 +142,7 @@
           <section id="progress" class="mb-3">
             <div class="section-style">
               <h2 class="fs-2 mb-2">Daily Progress</h2>
-              <div class="task-achievement mt-3 mb-3">
+              <div class="task-achievement mt-3 mb-2">
                 <div
                   class="count m-auto text-center radius-rounded pt-1 pb-1 txt-color-light bg-color-secondary"
                 >
@@ -171,7 +183,7 @@
               <!-- ^ -----------------ongoing tasks section----------------- -->
               <section id="ongoing" class="text-center">
                 <p
-                  class="session-num mt-4 txt-capitalize txt-color-primary fw-2 d-none"
+                  class="session-num mt-4 txt-capitalize txt-color-primary fw-2 v-hidden"
                 >
                   Session <span class="current-session">1</span> out of
                   <span class="total-sessions">2</span>
@@ -190,12 +202,12 @@
                     class="range absolute radius-rounded bg-color-primary-dark"
                   ></div>
                 </div>
-                <p class="task-info mt-5 mb-5 txt-color-dark">
+                <p class="task-info mt-5 mb-5 txt-color-dark v-hidden">
                   #<span class="order">3</span> -
                   <span class="title">Morning Exercise</span>
                 </p>
 
-                <div class="timer-controls row gx-3 center">
+                <div class="timer-controls row gx-3 center mt-6">
                   <div class="col-3 col-sm-2">
                     <button
                       class="re-play btn ms-auto p-2 d-flex center align-center border-primary txt-color-primary radius-circle trans-primary"
@@ -513,7 +525,10 @@
       </div>
     </section>
 
-    <section id="celebration" class="d-none vh-100 absolute position-0">
+    <section
+      id="celebration"
+      class="v-hidden opacity-0 vh-100 absolute position-0"
+    >
       <p
         class="txt-capitalize fs-2 bg-color-secondary-opaque txt-color-light p-4 radius-small text-center"
       >
@@ -522,6 +537,19 @@
         🎉🥳👏
       </p>
     </section>
+    <!-- ^ -----------------audio----------------- -->
+    <audio
+      id="notification-sound"
+      class="d-none"
+      src="./assets/notification.wav"
+      controls
+    ></audio>
+    <audio
+      id="yay-sound"
+      class="d-none"
+      src="./assets/yay.mp3"
+      controls
+    ></audio>
     <!-- ^ -----------------Script----------------- -->
     <script src="./js/main.js" type="module"></script>
   </body>

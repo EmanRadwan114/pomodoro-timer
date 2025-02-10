@@ -25,7 +25,7 @@ import {
   switchTab,
   switchtoAddMode,
   switchtoEditMode,
-  updateSessionNum,
+  updateTimerData,
 } from "./utilitis.js";
 
 // ^-------------------------------Tasks List---------------------------------
@@ -80,6 +80,9 @@ const cancelDeleteBtn = document.querySelector(
 );
 const searchField = document.getElementById("search-field");
 const completeAllTasksBtn = document.getElementById("complete-all-tasks");
+const deleteCompletedTaskskBtn = document.getElementById(
+  "delete-completed-tasks"
+);
 const deleteAllTasksBtn = document.getElementById("delete-all-tasks");
 
 // *add new task
@@ -186,56 +189,76 @@ addTaskModal.children[0].addEventListener("click", (e) => {
 // & 4- task features
 let selectedTask = null;
 tasksContainer.addEventListener("click", (e) => {
-  selectedTask = myTasks.retrieveTask(
-    e.target.closest(".box").id.split("-")[2]
-  );
+  if (e.target.closest(".box")) {
+    selectedTask = myTasks.retrieveTask(
+      e.target.closest(".box").id.split("-")[2]
+    );
 
-  // * display task info
-  if (e.target.classList.contains("display-task-btn")) {
-    selectedTask = myTasks.retrieveTask(e.target.getAttribute("data-identity"));
-    showModal(showTaskModal);
-    displayTaskInfo(myTasks, selectedTask.id);
-  }
-  //* complete task
-  else if (
-    e.target.classList.contains("complete-task-btn") ||
-    e.target.classList.contains("uncomplete-task-btn")
-  ) {
-    selectedTask = myTasks.retrieveTask(e.target.getAttribute("data-identity"));
-    myTasks.completeTask(selectedTask.id);
-
-    selectedTask = myTasks.retrieveTask(selectedTask.id);
-    tasksList = myTasks.getAllTasks();
-    displayUserProgress(progressObj, tasksList);
-
-    if (e.target.classList.contains("fa-solid")) {
-      e.target.parentElement.classList.toggle("bg-color-secondary");
-      e.target.closest(".box").querySelector("ul").children[1].innerText =
-        selectedTask.isCompleted ? "Uncomplete Task" : "Complete Task";
-    } else {
-      e.target
-        .closest(".box")
-        .querySelector(".circle")
-        .classList.toggle("bg-color-secondary");
-      e.target.innerText = selectedTask.isCompleted
-        ? "Uncomplete Task"
-        : "Complete Task";
+    // * display task info
+    if (e.target.classList.contains("display-task-btn")) {
+      selectedTask = myTasks.retrieveTask(
+        e.target.getAttribute("data-identity")
+      );
+      showModal(showTaskModal);
+      displayTaskInfo(myTasks, selectedTask.id);
     }
-  }
-  // *edit task
-  else if (e.target.classList.contains("edit-task-btn")) {
-    selectedTask = myTasks.retrieveTask(e.target.getAttribute("data-identity"));
+    //* complete task
+    else if (
+      e.target.classList.contains("complete-task-btn") ||
+      e.target.classList.contains("uncomplete-task-btn")
+    ) {
+      selectedTask = myTasks.retrieveTask(
+        e.target.getAttribute("data-identity")
+      );
+      myTasks.completeTask(selectedTask.id);
 
-    // ? show edit modal
-    showModal(addTaskModal);
-    switchtoEditMode(addBtn, editBtn);
-    displayTaskInfoForEdit(selectedTask);
-    counter = selectedTask.sessionNumber;
-  }
-  // *delete task
-  else if (e.target.classList.contains("delete-task-btn")) {
-    selectedTask = myTasks.retrieveTask(e.target.getAttribute("data-identity"));
-    showModal(deleteTaskModal);
+      selectedTask = myTasks.retrieveTask(selectedTask.id);
+      tasksList = myTasks.getAllTasks();
+      displayUserProgress(progressObj, tasksList);
+
+      if (e.target.classList.contains("fa-solid")) {
+        e.target.parentElement.classList.toggle("bg-color-secondary");
+        e.target.closest(".box").querySelector("ul").children[1].innerText =
+          selectedTask.isCompleted ? "Uncomplete Task" : "Complete Task";
+      } else {
+        e.target
+          .closest(".box")
+          .querySelector(".circle")
+          .classList.toggle("bg-color-secondary");
+        e.target.innerText = selectedTask.isCompleted
+          ? "Uncomplete Task"
+          : "Complete Task";
+      }
+
+      selectedTask.isCompleted
+        ? e.target
+            .closest(".box")
+            .querySelector(".edit-task-btn")
+            .classList.add("d-none")
+        : e.target
+            .closest(".box")
+            .querySelector(".edit-task-btn")
+            .classList.remove("d-none");
+    }
+    // *edit task
+    else if (e.target.classList.contains("edit-task-btn")) {
+      selectedTask = myTasks.retrieveTask(
+        e.target.getAttribute("data-identity")
+      );
+
+      // ? show edit modal
+      showModal(addTaskModal);
+      switchtoEditMode(addBtn, editBtn);
+      displayTaskInfoForEdit(selectedTask);
+      counter = selectedTask.sessionNumber;
+    }
+    // *delete task
+    else if (e.target.classList.contains("delete-task-btn")) {
+      selectedTask = myTasks.retrieveTask(
+        e.target.getAttribute("data-identity")
+      );
+      showModal(deleteTaskModal);
+    }
   }
 });
 
@@ -285,11 +308,12 @@ editBtn.addEventListener("click", (e) => {
     categoryItems
   );
 
-  updateSessionNum(updatedTask);
+  updateTimerData(updatedTask);
 });
 
 // ? confirm deletion
 confirmDeleteBtn.addEventListener("click", (e) => {
+  e.preventDefault();
   if (deleteTaskModal.getAttribute("data-number") == "one") {
     myTasks.deleteTask(selectedTask.id);
     tasksList = myTasks.getAllTasks();
@@ -297,13 +321,20 @@ confirmDeleteBtn.addEventListener("click", (e) => {
     displayTasks(tasksList.length, tasksList, tasksContainer);
   } else if (deleteTaskModal.getAttribute("data-number") == "all") {
     myTasks.deleteAllTasks();
-    emptyTaskContainer(tasksContainer);
     tasksList = myTasks.getAllTasks();
+    emptyTaskContainer(tasksContainer);
+    deleteTaskModal.setAttribute("data-number", "one");
+  } else if (deleteTaskModal.getAttribute("data-number") == "completed") {
+    myTasks.deleteCompletedTasks();
+    tasksList = myTasks.getAllTasks();
+    emptyTaskContainer(tasksContainer);
+    displayTasks(tasksList.length, tasksList, tasksContainer);
     deleteTaskModal.setAttribute("data-number", "one");
   }
   displayUserProgress(progressObj, tasksList);
-
   closeModal(deleteTaskModal);
+  selectedTask = null;
+  updateTimerData(selectedTask);
 });
 
 // *search for a task by title
@@ -311,6 +342,16 @@ searchField.addEventListener("input", (e) => {
   const foundTasks = myTasks.searchTask(searchField.value);
   emptyTaskContainer(tasksContainer);
   displayTasks(foundTasks.length, foundTasks, tasksContainer);
+
+  if (!foundTasks.length && tasksList.length) {
+    tasksContainer.children[0].querySelector("p").innerText =
+      "No Tasks Found 😔";
+  } else {
+    tasksContainer.children[0].querySelector(
+      "p"
+    ).innerHTML = `You have No Tasks <br/>
+                    start adding a new one 😊`;
+  }
 });
 
 // & complete & delete all tasks
@@ -323,11 +364,14 @@ completeAllTasksBtn.addEventListener("click", (e) => {
   displayUserProgress(progressObj, tasksList);
 });
 
+deleteCompletedTaskskBtn.addEventListener("click", (e) => {
+  deleteTaskModal.setAttribute("data-number", "completed");
+  showModal(deleteTaskModal);
+});
+
 deleteAllTasksBtn.addEventListener("click", (e) => {
   deleteTaskModal.setAttribute("data-number", "all");
   showModal(deleteTaskModal);
-  // *update user progress
-  displayUserProgress(progressObj, tasksList);
 });
 
 //? close delete task modal
@@ -350,18 +394,18 @@ export let sessionNumericals = document.querySelector("#ongoing .session-num");
 let taskBoxes = document.getElementsByClassName("box");
 
 tasksContainer.addEventListener("click", (e) => {
-  const box = e.target.closest(".box");
-  box.style.outline = "none";
+  if (e.target.closest(".box")) {
+    const box = e.target.closest(".box");
+    box.style.outline = "none";
 
-  for (let i = 0; i < taskBoxes.length; i++) {
-    taskBoxes[i].style.outline = "none";
+    for (let i = 0; i < taskBoxes.length; i++) {
+      taskBoxes[i].style.outline = "none";
+    }
+
+    selectedTask = myTasks.retrieveTask(box.id.split("-")[2]);
+    box.style.outline = "2px solid rgba(0, 0, 0, 0.5)";
+    updateTimerData(selectedTask);
   }
-
-  selectedTask = myTasks.retrieveTask(box.id.split("-")[2]);
-  box.style.outline = "2px solid rgba(0, 0, 0, 0.5)";
-  updateSessionNum(selectedTask);
-
-  nextSessionBtn.style.cssText = "cursor:pointer";
 });
 
 // ^--------------------------display current date -------------------------
@@ -394,13 +438,16 @@ const breakTimerSecs = document.querySelector("#break .count-down-time")
 const playOngoingBtn = document.querySelector("#ongoing .play-btn");
 const stopOngoingBtn = document.querySelector("#ongoing .stop-btn");
 const replayOngoingBtn = document.querySelector("#ongoing .re-play");
-const nextSessionBtn = document.querySelector("#ongoing .next-step");
+export const nextSessionBtn = document.querySelector("#ongoing .next-step");
 const playBreakBtn = document.querySelector("#break .play-btn");
 const stopBreakBtn = document.querySelector("#break .stop-btn");
 const replayBreakBtn = document.querySelector("#break .re-play");
 const ongoingRange = document.querySelector("#ongoing .range");
 const breakRange = document.querySelector("#break .range");
 export const celebrationMsg = document.querySelector("#celebration");
+export const taskTitle = document.querySelector("#ongoing .task-info");
+export const notificationSound = document.getElementById("notification-sound");
+export const yaySound = document.getElementById("yay-sound");
 
 let ongoingTimer = new Timer(24, 60);
 let breakTimer = new Timer(4, 60);
@@ -501,11 +548,7 @@ replayBreakBtn.addEventListener("click", () => {
 });
 
 // & move to next session in ongoing timer
-!selectedTask
-  ? (nextSessionBtn.style.cssText =
-      "color:grey; border:2px solid grey; cursor:not-allowed")
-  : "color:var(--txt-color-primary); border:2px solid var(--border-primary); cursor:pointer";
-
+updateTimerData(selectedTask);
 nextSessionBtn.addEventListener("click", () => {
   //* stop timer of previous session
   stopOtherWorkingTimer(ongoingTimer, playOngoingBtn, stopOngoingBtn);
@@ -521,7 +564,16 @@ nextSessionBtn.addEventListener("click", () => {
   selectedTask = myTasks.retrieveTask(selectedTask.id);
   currentSession.innerText = selectedTask.currentSession;
 
-  if (selectedTask.currentSession == selectedTask.sessionNumber) {
+  document.querySelector(
+    `#task-box-${selectedTask.id} .current-session`
+  ).innerText = selectedTask.currentSession;
+
+  if (
+    selectedTask.currentSession == selectedTask.sessionNumber &&
+    !selectedTask.isCompleted
+  ) {
+    // * display celebration msg
+    displayCelebrationMsg(selectedTask);
     myTasks.completeTask(selectedTask.id);
     document
       .querySelector(`#task-box-${selectedTask.id} .circle`)
@@ -534,8 +586,7 @@ nextSessionBtn.addEventListener("click", () => {
     ).innerText = selectedTask.isCompleted
       ? "Uncomplete Task"
       : "Complete Task";
-
-    // * display celebration msg
-    displayCelebrationMsg();
+    nextSessionBtn.style.cssText =
+      "color:grey; border:2px solid grey; cursor:not-allowed";
   }
 });

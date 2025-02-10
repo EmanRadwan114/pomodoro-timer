@@ -2,11 +2,15 @@ import {
   addNoteBtn,
   categoryItems,
   celebrationMsg,
+  nextSessionBtn,
   noteContent,
+  notificationSound,
   sessionNum,
   sessionNumericals,
   sessionTime,
+  taskTitle,
   titleField,
+  yaySound,
 } from "./main.js";
 
 export const displayCurrentDate = () => {
@@ -27,7 +31,7 @@ export function switchBtns(btn_1, btn_2) {
   btn_2.parentNode.classList.toggle("d-none");
 }
 
-function calculareProgress(timer, range) {
+function calculateProgress(timer, range) {
   //* Calculate progress for range slider
   let remainingSeconds = timer.getMins() * 60 + timer.getSecs();
   let percentage = (remainingSeconds / timer.getTotalSeconds()) * 100;
@@ -41,7 +45,7 @@ function updateUI(timer, minTxt, secTxt, range) {
     timer.getSecs() < 10 ? `0${timer.getSecs()}` : timer.getSecs();
 
   //* Calculate progress for range slider
-  calculareProgress(timer, range);
+  calculateProgress(timer, range);
 }
 
 let displayInterval;
@@ -54,7 +58,7 @@ export const displayTimerData = (
   btn_2
 ) => {
   // *Calculate progress for range slider
-  calculareProgress(timer, range);
+  calculateProgress(timer, range);
 
   displayInterval = setInterval(() => {
     //* update ui every second
@@ -65,6 +69,7 @@ export const displayTimerData = (
 
     if (!timer.getIsWorking()) {
       clearInterval(displayInterval);
+      notificationSound.play();
     }
   }, 1000);
 };
@@ -241,6 +246,12 @@ export function createTaskBox(task) {
     li.setAttribute("data-identity", task.id);
     li.textContent = text;
     menuList.appendChild(li);
+
+    task.isCompleted
+      ? li.innerText.toLowerCase() == "edit task"
+        ? li.classList.add("d-none")
+        : li.classList.remove("d-none")
+      : "";
   });
 
   menuDiv.appendChild(menuIcon);
@@ -318,8 +329,8 @@ export function displayUserProgress(txt, tasksList) {
       : `(${tasksList.length} Task)`;
 
   tasksList.filter((task) => task.isCompleted == true).length >= 1
-    ? txt.celebrateTxt.classList.remove("d-none")
-    : txt.celebrateTxt.classList.add("d-none");
+    ? txt.celebrateTxt.classList.remove("v-hidden", "opacity-0")
+    : txt.celebrateTxt.classList.add("v-hidden", "opacity-0");
 }
 
 export function displayTaskInfo(myTasks, id) {
@@ -381,39 +392,56 @@ export function displayUpdatedData(updatedTask) {
 }
 
 export function emptyTaskContainer(tasksContainer) {
-  tasksContainer.innerHTML = `<div
-  class="d-flex align-center center d-none text-center absolute position-0"
->
-  <div class="txt-capitalize fs-3 mt-5 mb-5">
-    <p class="mb-2">You have No Tasks</p>
-    <p>start adding a new one 😊</p>
-  </div>
-</div>`;
+  tasksContainer.innerHTML = ` 
+                <div
+                  class="d-flex align-center center text-center vh-25 start-txt"
+                >
+                  <div class="txt-capitalize mt-5 mb-5">
+                    <p class="mb-2 fs-3">You have No Tasks <br/>
+                    start adding a new one 😊</p>
+                  </div>
+                </div>`;
 }
 
-export function updateSessionNum(selectedTask) {
-  selectedTask
-    ? sessionNumericals.classList.remove("d-none")
-    : sessionNumericals.classList.add("d-none");
+export function updateTimerData(selectedTask) {
+  if (selectedTask) {
+    sessionNumericals.classList.remove("v-hidden");
+    taskTitle.classList.remove("v-hidden");
+    nextSessionBtn.style.cssText =
+      selectedTask.sessionNumber > 1 &&
+      !selectedTask.isCompleted &&
+      selectedTask.sessionNumber != selectedTask.currentSession
+        ? "cursor:pointer"
+        : "color:grey; border:2px solid grey; cursor:not-allowed";
+  } else {
+    sessionNumericals.classList.add("v-hidden");
+    taskTitle.classList.add("v-hidden");
+    nextSessionBtn.style.cssText =
+      "color:grey; border:2px solid grey; cursor:not-allowed";
+  }
 
   sessionNumericals.children[0].innerText = selectedTask?.currentSession;
   sessionNumericals.children[1].innerText = selectedTask?.sessionNumber;
+  taskTitle.children[0].innerText = selectedTask?.id;
+  taskTitle.children[1].innerText = selectedTask?.title;
 }
 
-export function displayCelebrationMsg() {
-  setTimeout(() => {
-    // Get the user's scroll position
-    const x = window.scrollX + window.innerWidth / 2 - 25; // Center horizontally
-    const y = window.scrollY + window.innerHeight / 2 - 25; // Center vertically
+export function displayCelebrationMsg(selectedTask) {
+  yaySound.play();
+  // Get the user's scroll position
+  const x = window.scrollX + window.innerWidth / 2 - 25; // Center horizontally
+  const y = window.scrollY + window.innerHeight / 2 - 25; // Center vertically
 
-    // Position the div at the user's scroll position
-    celebrationMsg.style.left = `${x}px`;
-    celebrationMsg.style.top = `${y}px`;
-    celebrationMsg.style.transform = `translateX(-50%)`;
-    celebrationMsg.classList.remove("d-none");
-  }, 50);
+  // Position the div at the user's scroll position
+  celebrationMsg.style.left = `${x}px`;
+  celebrationMsg.style.top = `${y}px`;
+  celebrationMsg.style.transform = `translateX(-50%)`;
+
+  setTimeout(() => {
+    celebrationMsg.classList.remove("v-hidden", "opacity-0");
+  }, 1000);
 
   setTimeout(() => {
     celebrationMsg.classList.add("d-none");
-  }, 500);
+  }, 3500);
 }
