@@ -24,7 +24,7 @@ You can try the app here: [Pomodoro Timer Demo](https://emanradwan114.github.io/
 ## How to Use
 1. **Set Timer**: Adjust the work and break durations using the input fields.
 2. **Start Timer**: Click the "Start" button to begin your work session.
-3. **Take Breaks**: When the work session ends, tyou can switch to the break session.
+3. **Take Breaks**: When the work session ends, you can switch to the break session.
 4. **Repeat**: Continue the cycle to stay productive throughout the day.
 
 ## 🏗 Tech Stack
@@ -32,7 +32,7 @@ This project uses the following technologies:
 - **Frontend:**  
   - **HTML** for the structure  
   - **CSS** for styling  
-  - **JavaScript** for the timer functionality  
+  - **JavaScript** for the CRUD operations & the timer functionality  
 
 - **Libraries/Tools:**  
   - No external libraries or frameworks were used in this project except the fontawesome library; This project is built with vanilla JS to keep it lightweight and simple.
