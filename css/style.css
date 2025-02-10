@@ -299,10 +299,6 @@ textarea::placeholder,
 }
 
 /* ^----------------- celebration------------------- */
-#celebration {
-  transition: opacity 500ms;
-}
-
 #celebration p {
   box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.7);
 }
