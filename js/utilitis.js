@@ -279,14 +279,15 @@ export function createTaskBox(task) {
   container.prepend(taskDiv);
 }
 
-export function displayTasks(tasksLength, taskList) {
-  if (tasksLength == 0) {
-    startingTxt.classList.remove("d-none");
-    startingTxt.classList.add("d-flex");
+export function displayTasks(tasksList) {
+  const child = tasksContainer.children[tasksContainer.children.length - 1];
+  if (tasksList.length == 0) {
+    child.classList.remove("d-none");
+    child.classList.add("d-flex");
   } else {
-    startingTxt.classList.add("d-none");
-    startingTxt.classList.remove("d-flex");
-    taskList.forEach((task) => {
+    child.classList.add("d-none");
+    child.classList.remove("d-flex");
+    tasksList.forEach((task) => {
       createTaskBox(task);
     });
   }

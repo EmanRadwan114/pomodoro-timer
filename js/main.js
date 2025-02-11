@@ -59,7 +59,7 @@ if (window.screen.width > 992) {
 } else {
 }
 
-displayTasks(tasksList.length, tasksList);
+displayTasks(tasksList);
 
 // & 2- show user progress
 displayUserProgress(progressObj, tasksList);
@@ -292,8 +292,6 @@ editBtn.addEventListener("click", (e) => {
     // ? display updated data
     displayUpdatedData(updatedTask);
     // ?reset data
-    startingTxt.classList.add("d-none");
-    startingTxt.classList.remove("d-flex");
     counter = 1;
     closeModal(addTaskModal);
     clearTaskDate();
@@ -311,17 +309,18 @@ confirmDeleteBtn.addEventListener("click", (e) => {
     myTasks.deleteTask(selectedTask.id);
     tasksList = myTasks.getAllTasks();
     emptyTaskContainer();
-    displayTasks(tasksList.length, tasksList);
+    displayTasks(tasksList);
   } else if (deleteTaskModal.getAttribute("data-number") == "all") {
     myTasks.deleteAllTasks();
     tasksList = myTasks.getAllTasks();
     emptyTaskContainer();
+    displayTasks(tasksList);
     deleteTaskModal.setAttribute("data-number", "one");
   } else if (deleteTaskModal.getAttribute("data-number") == "completed") {
     myTasks.deleteCompletedTasks();
     tasksList = myTasks.getAllTasks();
     emptyTaskContainer();
-    displayTasks(tasksList.length, tasksList);
+    displayTasks(tasksList);
     deleteTaskModal.setAttribute("data-number", "one");
   }
   displayUserProgress(progressObj, tasksList);
@@ -334,7 +333,7 @@ confirmDeleteBtn.addEventListener("click", (e) => {
 searchField.addEventListener("input", (e) => {
   const foundTasks = myTasks.searchTask(searchField.value);
   emptyTaskContainer();
-  displayTasks(foundTasks.length, foundTasks);
+  displayTasks(foundTasks);
 
   if (!foundTasks.length && tasksList.length) {
     startingTxt.querySelector("p").innerText = "No Tasks Found 😔";
@@ -346,22 +345,28 @@ searchField.addEventListener("input", (e) => {
 
 // & complete & delete all tasks
 completeAllTasksBtn.addEventListener("click", (e) => {
-  myTasks.completeAllTasks();
-  tasksList = myTasks.getAllTasks();
-  emptyTaskContainer();
-  displayTasks(tasksList.length, tasksList);
-  // *update user progress
-  displayUserProgress(progressObj, tasksList);
+  if (tasksList.length) {
+    myTasks.completeAllTasks();
+    tasksList = myTasks.getAllTasks();
+    emptyTaskContainer();
+    displayTasks(tasksList);
+    // *update user progress
+    displayUserProgress(progressObj, tasksList);
+  }
 });
 
 deleteCompletedTaskskBtn.addEventListener("click", (e) => {
-  deleteTaskModal.setAttribute("data-number", "completed");
-  showModal(deleteTaskModal);
+  if (tasksList.length) {
+    deleteTaskModal.setAttribute("data-number", "completed");
+    showModal(deleteTaskModal);
+  }
 });
 
 deleteAllTasksBtn.addEventListener("click", (e) => {
-  deleteTaskModal.setAttribute("data-number", "all");
-  showModal(deleteTaskModal);
+  if (tasksList.length) {
+    deleteTaskModal.setAttribute("data-number", "all");
+    showModal(deleteTaskModal);
+  }
 });
 
 //? close delete task modal
@@ -379,7 +384,6 @@ deleteTaskModal.children[0].addEventListener("click", (e) => {
 
 // ^-------------------------------Link Tasks with timer---------------------------------
 let currentSession = document.querySelector("#ongoing .current-session");
-let totalSessions = document.querySelector("#ongoing .total-sessions");
 export let sessionNumericals = document.querySelector("#ongoing .session-num");
 let taskBoxes = document.getElementsByClassName("box");
 
