@@ -289,6 +289,15 @@ tasksContainer.addEventListener("click", (e) => {
       )?.breakTimer;
       timersList = myTimers.getAllTimers();
 
+      updateTimerData(
+        selectedTask,
+        selectedOngoingTimer,
+        selectedBreakTimer,
+        tasksList.length,
+        playOngoingBtn,
+        playBreakBtn
+      );
+
       displayUserProgress(progressObj, tasksList);
 
       if (e.target.classList.contains("fa-solid")) {

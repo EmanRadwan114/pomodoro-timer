@@ -56,7 +56,7 @@ export default class TimersContainer {
     this.#timersContainer = this.getAllTimers();
 
     this.#timersContainer = this.#timersContainer.map((timer) => {
-      timer.isCompleted = true;
+      timer.taskId != 0 ? (timer.isCompleted = true) : null;
       return timer;
     });
 
@@ -67,7 +67,7 @@ export default class TimersContainer {
     this.#timersContainer = this.getAllTimers();
 
     this.#timersContainer = this.#timersContainer.filter((timer) => {
-      return timer.isCompleted == false;
+      return timer.isCompleted == false || timer.taskId == 0;
     });
 
     this.saveAllTimers();
