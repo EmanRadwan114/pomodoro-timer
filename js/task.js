@@ -8,7 +8,9 @@ export default class Task {
     startTime,
     endTime,
     category,
-    notes
+    notes,
+    ongoingTimer,
+    breakTimer
   ) {
     this.id = id;
     this.title = title;
@@ -19,15 +21,9 @@ export default class Task {
     this.startTime = startTime;
     this.endTime = endTime;
     this.category = category;
-    this.notes = notes;
     this.isCompleted = false;
-  }
-
-  setIsCompleted(val) {
-    this.isCompleted = val;
-  }
-
-  getIsCompleted() {
-    return this.isCompleted;
+    this.notes = notes;
+    this.ongoingTimer = ongoingTimer;
+    this.breakTimer = breakTimer;
   }
 }

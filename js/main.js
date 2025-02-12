@@ -8,8 +8,8 @@ import {
   clearTaskDate,
   closeModal,
   createTaskBox,
-  displayCelebrationMsg,
   displayCurrentDate,
+  displayInterval,
   displayTaskInfo,
   displayTaskInfoForEdit,
   displayTasks,
@@ -27,17 +27,28 @@ import {
   switchtoAddMode,
   switchtoEditMode,
   updateTimerData,
+  updateUI,
   validateForm,
 } from "./utilitis.js";
+import TimersContainer from "./allTimers.js";
+
+// ^-----------------------------default timers----------------------
+const myTimers = new TimersContainer();
+let timersList = myTimers.getAllTimers();
+let selectedOngoingTimer = null;
+let selectedBreakTimer = null;
+let selectedTask = null;
 
 // ^-------------------------------Tasks List---------------------------------
 const taskListSection = document.querySelector("#tasks .tasks-container");
 export const tasksContainer = document.getElementById("tasks-container");
-export const startingTxt = document.querySelector(".start-txt");
 const tasksNum = document.querySelector(".tasks-container h2 span");
 const celebrateTxt = document.getElementById("celebrate-txt");
 const completedTasks = document.querySelector("#progress .completed");
 const totalTasks = document.querySelector("#progress .total");
+let currentSession = document.querySelector("#ongoing .current-session");
+export let sessionNumericals = document.querySelector("#ongoing .session-num");
+let taskBoxes = document.getElementsByClassName("box");
 const myTasks = new TasksContainer();
 let tasksList = myTasks.getAllTasks();
 const progressObj = {
@@ -48,15 +59,11 @@ const progressObj = {
 };
 
 // & 1- display all tasks
-console.log(window.screen.width);
-
 if (window.screen.width > 992) {
   taskListSection.style.height =
     parseInt(getComputedStyle(taskListSection.parentElement).height) -
     20 +
     "px";
-  console.log(taskListSection.style.height);
-} else {
 }
 
 displayTasks(tasksList);
@@ -137,7 +144,6 @@ sessionTime.min = now.toISOString().slice(0, 16);
 addBtn.addEventListener("click", (e) => {
   if (isFormValidated) {
     const taskTime = getTaskDate();
-
     const newTask = myTasks.addTask(
       tasksList.length + 1,
       titleField.value,
@@ -150,13 +156,22 @@ addBtn.addEventListener("click", (e) => {
       noteContent.value
     );
     tasksList = myTasks.getAllTasks();
-    createTaskBox(newTask);
 
+    // ?create task timers
+    const newTimers = myTimers.addTaskTimers(newTask.id);
+    timersList = myTimers.getAllTimers();
+
+    // ?display created task & update ui
+    createTaskBox(newTask);
     displayUserProgress(progressObj, tasksList);
 
     // ?reset data
-    startingTxt.classList.add("d-none");
-    startingTxt.classList.remove("d-flex");
+    tasksContainer.children[tasksContainer.children.length - 1].classList.add(
+      "d-none"
+    );
+    tasksContainer.children[
+      tasksContainer.children.length - 1
+    ].classList.remove("d-flex");
     counter = 1;
     closeModal(addTaskModal);
     clearTaskDate();
@@ -183,11 +198,50 @@ addTaskModal.children[0].addEventListener("click", (e) => {
 });
 
 // & 4- task features
-let selectedTask = null;
 tasksContainer.addEventListener("click", (e) => {
   if (e.target.closest(".box")) {
-    selectedTask = myTasks.retrieveTask(
-      e.target.closest(".box").id.split("-")[2]
+    // * link task with timer
+    const box = e.target.closest(".box");
+
+    for (let i = 0; i < taskBoxes.length; i++) {
+      taskBoxes[i].style.outline = "none";
+    }
+
+    // *stop working timers when click on new task & show the new timer data
+    switchTab(ongoingTab, breakTab, ongoingSection, breakSection);
+    if (selectedOngoingTimer?.isWorking) {
+      stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "ongoing",
+        playOngoingBtn,
+        stopOngoingBtn
+      );
+    } else if (selectedBreakTimer?.isWorking) {
+      stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "break",
+        playBreakBtn,
+        stopBreakBtn
+      );
+    }
+
+    selectedTask = myTasks.retrieveTask(box.id.split("-")[2]);
+    selectedOngoingTimer = myTimers.retrieveTimers(
+      selectedTask?.id
+    )?.ongoingTimer;
+    selectedBreakTimer = myTimers.retrieveTimers(selectedTask?.id)?.breakTimer;
+
+    box.style.outline = "2px solid rgba(0, 0, 0, 0.5)";
+
+    updateTimerData(
+      selectedTask,
+      selectedOngoingTimer,
+      selectedBreakTimer,
+      tasksList.length,
+      playOngoingBtn,
+      playBreakBtn
     );
 
     // * display task info
@@ -195,8 +249,16 @@ tasksContainer.addEventListener("click", (e) => {
       selectedTask = myTasks.retrieveTask(
         e.target.getAttribute("data-identity")
       );
+
+      selectedOngoingTimer = myTimers.retrieveTimers(
+        selectedTask?.id
+      )?.ongoingTimer;
+      selectedBreakTimer = myTimers.retrieveTimers(
+        selectedTask?.id
+      )?.breakTimer;
+
       showModal(showTaskModal);
-      displayTaskInfo(myTasks, selectedTask.id);
+      displayTaskInfo(myTasks, selectedTask?.id);
     }
     //* complete task
     else if (
@@ -206,10 +268,27 @@ tasksContainer.addEventListener("click", (e) => {
       selectedTask = myTasks.retrieveTask(
         e.target.getAttribute("data-identity")
       );
-      myTasks.completeTask(selectedTask.id);
 
-      selectedTask = myTasks.retrieveTask(selectedTask.id);
+      selectedOngoingTimer = myTimers.retrieveTimers(
+        selectedTask?.id
+      )?.ongoingTimer;
+      selectedBreakTimer = myTimers.retrieveTimers(
+        selectedTask?.id
+      )?.breakTimer;
+
+      myTasks.completeTask(selectedTask?.id);
+      selectedTask = myTasks.retrieveTask(selectedTask?.id);
       tasksList = myTasks.getAllTasks();
+
+      myTimers.completeTimer(selectedTask?.id);
+      selectedOngoingTimer = myTimers.retrieveTimers(
+        selectedTask?.id
+      )?.ongoingTimer;
+      selectedBreakTimer = myTimers.retrieveTimers(
+        selectedTask?.id
+      )?.breakTimer;
+      timersList = myTimers.getAllTimers();
+
       displayUserProgress(progressObj, tasksList);
 
       if (e.target.classList.contains("fa-solid")) {
@@ -242,6 +321,13 @@ tasksContainer.addEventListener("click", (e) => {
         e.target.getAttribute("data-identity")
       );
 
+      selectedOngoingTimer = myTimers.retrieveTimers(
+        selectedTask?.id
+      )?.ongoingTimer;
+      selectedBreakTimer = myTimers.retrieveTimers(
+        selectedTask?.id
+      )?.breakTimer;
+
       // ? show edit modal
       showModal(addTaskModal);
       switchtoEditMode(addBtn, editBtn);
@@ -253,6 +339,12 @@ tasksContainer.addEventListener("click", (e) => {
       selectedTask = myTasks.retrieveTask(
         e.target.getAttribute("data-identity")
       );
+      selectedOngoingTimer = myTimers.retrieveTimers(
+        selectedTask?.id
+      )?.ongoingTimer;
+      selectedBreakTimer = myTimers.retrieveTimers(
+        selectedTask?.id
+      )?.breakTimer;
       showModal(deleteTaskModal);
     }
   }
@@ -273,10 +365,10 @@ showTaskModal.children[0].addEventListener("click", (e) => {
 
 // ?edit & display updated data data
 editBtn.addEventListener("click", (e) => {
-  if (isFormValidated) {
+  if (isFormValidated || titleField.value.length >= 3) {
     const taskTime = getTaskDate();
     const updatedTask = myTasks.editTask(
-      selectedTask.id,
+      selectedTask?.id,
       titleField.value,
       sessionNum.innerText,
       taskTime.taskFullDate,
@@ -296,7 +388,14 @@ editBtn.addEventListener("click", (e) => {
     closeModal(addTaskModal);
     clearTaskDate();
 
-    updateTimerData(updatedTask, tasksList.length);
+    updateTimerData(
+      updatedTask,
+      selectedOngoingTimer,
+      selectedBreakTimer,
+      tasksList.length,
+      playOngoingBtn,
+      playBreakBtn
+    );
   } else {
     validationTxt.classList.remove("d-none");
   }
@@ -306,27 +405,48 @@ editBtn.addEventListener("click", (e) => {
 confirmDeleteBtn.addEventListener("click", (e) => {
   e.preventDefault();
   if (deleteTaskModal.getAttribute("data-number") == "one") {
-    myTasks.deleteTask(selectedTask.id);
+    myTasks.deleteTask(selectedTask?.id);
     tasksList = myTasks.getAllTasks();
+    myTimers.deleteTimer(selectedTask?.id);
+    timersList = myTimers.getAllTimers();
     emptyTaskContainer();
     displayTasks(tasksList);
   } else if (deleteTaskModal.getAttribute("data-number") == "all") {
     myTasks.deleteAllTasks();
     tasksList = myTasks.getAllTasks();
+    myTimers.deleteAllTimers();
+    timersList = myTimers.getAllTimers();
     emptyTaskContainer();
     displayTasks(tasksList);
     deleteTaskModal.setAttribute("data-number", "one");
   } else if (deleteTaskModal.getAttribute("data-number") == "completed") {
     myTasks.deleteCompletedTasks();
     tasksList = myTasks.getAllTasks();
+    myTimers.deleteCompletedTimers();
+    timersList = myTimers.getAllTimers();
     emptyTaskContainer();
     displayTasks(tasksList);
     deleteTaskModal.setAttribute("data-number", "one");
   }
   displayUserProgress(progressObj, tasksList);
   closeModal(deleteTaskModal);
+
   selectedTask = null;
-  updateTimerData(selectedTask, tasksList.length);
+
+  let defaultTimer = timersList.find((timer) => timer.taskId == 0);
+  defaultTimer = !defaultTimer ? myTimers.addTaskTimers(0) : defaultTimer;
+
+  selectedOngoingTimer = defaultTimer?.ongoingTimer;
+  selectedBreakTimer = defaultTimer?.breakTimer;
+
+  updateTimerData(
+    selectedTask,
+    selectedOngoingTimer,
+    selectedBreakTimer,
+    tasksList.length,
+    playOngoingBtn,
+    playBreakBtn
+  );
 });
 
 // *search for a task by title
@@ -336,18 +456,64 @@ searchField.addEventListener("input", (e) => {
   displayTasks(foundTasks);
 
   if (!foundTasks.length && tasksList.length) {
-    startingTxt.querySelector("p").innerText = "No Tasks Found 😔";
+    tasksContainer.children[tasksContainer.children.length - 1].querySelector(
+      "p"
+    ).innerText = "No Tasks Found 😔";
   } else {
-    startingTxt.querySelector("p").innerHTML = `You have No Tasks <br/>
+    tasksContainer.children[tasksContainer.children.length - 1].querySelector(
+      "p"
+    ).innerHTML = `You have No Tasks <br/>
                     start adding a new one 😊`;
   }
 });
 
 // & complete & delete all tasks
 completeAllTasksBtn.addEventListener("click", (e) => {
+  //* stop break timer & switch its buttons
+  selectedBreakTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "break",
+        playBreakBtn,
+        stopBreakBtn
+      )
+    : null;
+
+  //* stop break timer & switch its buttons
+  selectedOngoingTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "ongoing",
+        playOngoingBtn,
+        stopOngoingBtn
+      )
+    : null;
+  selectedTask = null;
+
+  let defaultTimer = timersList.find((timer) => timer.taskId == 0);
+  defaultTimer = !defaultTimer ? myTimers.addTaskTimers(0) : defaultTimer;
+
+  selectedOngoingTimer = defaultTimer?.ongoingTimer;
+  selectedBreakTimer = defaultTimer?.breakTimer;
+
+  updateTimerData(
+    selectedTask,
+    selectedOngoingTimer,
+    selectedBreakTimer,
+    tasksList.length,
+    playOngoingBtn,
+    playBreakBtn
+  );
+
   if (tasksList.length) {
     myTasks.completeAllTasks();
     tasksList = myTasks.getAllTasks();
+
+    myTimers.completeAllTimers();
+    timersList = myTimers.getAllTimers();
+
     emptyTaskContainer();
     displayTasks(tasksList);
     // *update user progress
@@ -356,6 +522,27 @@ completeAllTasksBtn.addEventListener("click", (e) => {
 });
 
 deleteCompletedTaskskBtn.addEventListener("click", (e) => {
+  //* stop break timer & switch its buttons
+  selectedBreakTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "break",
+        playBreakBtn,
+        stopBreakBtn
+      )
+    : null;
+
+  //* stop break timer & switch its buttons
+  selectedOngoingTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "ongoing",
+        playOngoingBtn,
+        stopOngoingBtn
+      )
+    : null;
   if (tasksList.length) {
     deleteTaskModal.setAttribute("data-number", "completed");
     showModal(deleteTaskModal);
@@ -363,6 +550,27 @@ deleteCompletedTaskskBtn.addEventListener("click", (e) => {
 });
 
 deleteAllTasksBtn.addEventListener("click", (e) => {
+  //* stop break timer & switch its buttons
+  selectedBreakTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "break",
+        playBreakBtn,
+        stopBreakBtn
+      )
+    : null;
+
+  //* stop break timer & switch its buttons
+  selectedOngoingTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "ongoing",
+        playOngoingBtn,
+        stopOngoingBtn
+      )
+    : null;
   if (tasksList.length) {
     deleteTaskModal.setAttribute("data-number", "all");
     showModal(deleteTaskModal);
@@ -380,26 +588,6 @@ deleteTaskModal.addEventListener("click", (e) => {
 
 deleteTaskModal.children[0].addEventListener("click", (e) => {
   e.stopPropagation();
-});
-
-// ^-------------------------------Link Tasks with timer---------------------------------
-let currentSession = document.querySelector("#ongoing .current-session");
-export let sessionNumericals = document.querySelector("#ongoing .session-num");
-let taskBoxes = document.getElementsByClassName("box");
-
-tasksContainer.addEventListener("click", (e) => {
-  if (e.target.closest(".box")) {
-    const box = e.target.closest(".box");
-    box.style.outline = "none";
-
-    for (let i = 0; i < taskBoxes.length; i++) {
-      taskBoxes[i].style.outline = "none";
-    }
-
-    selectedTask = myTasks.retrieveTask(box.id.split("-")[2]);
-    box.style.outline = "2px solid rgba(0, 0, 0, 0.5)";
-    updateTimerData(selectedTask, tasksList.length);
-  }
 });
 
 // ^--------------------------display current date -------------------------
@@ -421,42 +609,83 @@ breakTab.addEventListener("click", function () {
 });
 
 // ^-------------------------------timing controls ---------------------------------
-const ongoingTimerMins = document.querySelector("#ongoing .count-down-time")
+export const ongoingTimerMins = document.querySelector(
+  "#ongoing .count-down-time"
+).children[0];
+export const ongoingTimerSecs = document.querySelector(
+  "#ongoing .count-down-time"
+).children[1];
+export const breakTimerMins = document.querySelector("#break .count-down-time")
   .children[0];
-const ongoingTimerSecs = document.querySelector("#ongoing .count-down-time")
+export const breakTimerSecs = document.querySelector("#break .count-down-time")
   .children[1];
-const breakTimerMins = document.querySelector("#break .count-down-time")
-  .children[0];
-const breakTimerSecs = document.querySelector("#break .count-down-time")
-  .children[1];
-const playOngoingBtn = document.querySelector("#ongoing .play-btn");
-const stopOngoingBtn = document.querySelector("#ongoing .stop-btn");
-const replayOngoingBtn = document.querySelector("#ongoing .re-play");
+export const playOngoingBtn = document.querySelector("#ongoing .play-btn");
+export const stopOngoingBtn = document.querySelector("#ongoing .stop-btn");
+export const replayOngoingBtn = document.querySelector("#ongoing .re-play");
 export const nextSessionBtn = document.querySelector("#ongoing .next-step");
-const playBreakBtn = document.querySelector("#break .play-btn");
-const stopBreakBtn = document.querySelector("#break .stop-btn");
-const replayBreakBtn = document.querySelector("#break .re-play");
-const ongoingRange = document.querySelector("#ongoing .range");
-const breakRange = document.querySelector("#break .range");
+export const playBreakBtn = document.querySelector("#break .play-btn");
+export const stopBreakBtn = document.querySelector("#break .stop-btn");
+export const replayBreakBtn = document.querySelector("#break .re-play");
+export const ongoingRange = document.querySelector("#ongoing .range");
+export const breakRange = document.querySelector("#break .range");
 export const celebrationMsg = document.querySelector("#celebration");
 export const taskTitle = document.querySelector("#ongoing .task-info");
 export const notificationSound = document.getElementById("notification-sound");
 export const yaySound = document.getElementById("yay-sound");
 
-let ongoingTimer = new Timer(24, 60);
-let breakTimer = new Timer(4, 60);
+// &default timer
+if (!selectedTask) {
+  let defaultTimer = timersList.find((timer) => timer.taskId == 0);
+  defaultTimer = !defaultTimer ? myTimers.addTaskTimers(0) : defaultTimer;
+
+  selectedOngoingTimer = defaultTimer?.ongoingTimer;
+  selectedBreakTimer = defaultTimer?.breakTimer;
+
+  updateTimerData(
+    selectedTask,
+    selectedOngoingTimer,
+    selectedBreakTimer,
+    tasksList.length,
+    playOngoingBtn,
+    playBreakBtn
+  );
+}
 
 // &start timers
 playOngoingBtn.addEventListener("click", () => {
-  //* stop break timer & switch its buttons
-  stopOtherWorkingTimer(breakTimer, playBreakBtn, stopBreakBtn);
+  // &default timer
+  if (!selectedTask) {
+    let defaultTimer = timersList.find((timer) => timer.taskId == 0);
+    defaultTimer = !defaultTimer ? myTimers.addTaskTimers(0) : defaultTimer;
 
-  ongoingTimer.startTimer(); //* start ongoing timer
+    selectedOngoingTimer = defaultTimer?.ongoingTimer;
+    selectedBreakTimer = defaultTimer?.breakTimer;
+  }
+
+  //* stop break timer & switch its buttons
+  selectedBreakTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "break",
+        playBreakBtn,
+        stopBreakBtn
+      )
+    : null;
+
+  myTimers.startTimer(selectedTask?.id, "ongoing"); //* start ongoing timer
   switchBtns(playOngoingBtn, stopOngoingBtn);
+
+  selectedOngoingTimer = myTimers.retrieveTimers(
+    selectedTask?.id
+  )?.ongoingTimer;
 
   //* update range & txt with timer
   displayTimerData(
-    ongoingTimer,
+    selectedTask,
+    myTasks,
+    myTimers,
+    selectedOngoingTimer,
     ongoingTimerMins,
     ongoingTimerSecs,
     ongoingRange,
@@ -466,15 +695,36 @@ playOngoingBtn.addEventListener("click", () => {
 });
 
 playBreakBtn.addEventListener("click", () => {
-  //* stop ongoing timer & switch its buttons
-  stopOtherWorkingTimer(ongoingTimer, playOngoingBtn, stopOngoingBtn);
+  // &default timer
+  if (!selectedTask) {
+    let defaultTimer = timersList.find((timer) => timer.taskId == 0);
+    defaultTimer = !defaultTimer ? myTimers.addTaskTimers(0) : defaultTimer;
 
-  breakTimer.startTimer(); //* start break timer
+    selectedOngoingTimer = defaultTimer?.ongoingTimer;
+    selectedBreakTimer = defaultTimer?.breakTimer;
+  }
+  //* stop ongoing timer & switch its buttons
+  selectedOngoingTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "ongoing",
+        playOngoingBtn,
+        stopOngoingBtn
+      )
+    : null;
+
+  myTimers.startTimer(selectedTask?.id, "break"); //* start ongoing timer
   switchBtns(playBreakBtn, stopBreakBtn);
+
+  selectedBreakTimer = myTimers.retrieveTimers(selectedTask?.id)?.breakTimer;
 
   //* update range & txt with timer
   displayTimerData(
-    breakTimer,
+    selectedTask,
+    myTasks,
+    myTimers,
+    selectedBreakTimer,
     breakTimerMins,
     breakTimerSecs,
     breakRange,
@@ -485,31 +735,76 @@ playBreakBtn.addEventListener("click", () => {
 
 // &stop timers
 stopOngoingBtn.addEventListener("click", () => {
-  ongoingTimer.stopTimer();
+  myTimers.stopTimer(selectedTask?.id, "ongoing");
+
+  clearInterval(displayInterval);
   switchBtns(playOngoingBtn, stopOngoingBtn);
+
+  selectedOngoingTimer = myTimers.retrieveTimers(
+    selectedTask?.id
+  )?.ongoingTimer;
 });
 
 stopBreakBtn.addEventListener("click", () => {
-  breakTimer.stopTimer();
+  myTimers.stopTimer(selectedTask?.id, "break");
+
+  clearInterval(displayInterval);
   switchBtns(playBreakBtn, stopBreakBtn);
+
+  selectedBreakTimer = myTimers.retrieveTimers(selectedTask?.id)?.breakTimer;
 });
 
 // &replay timers
 replayOngoingBtn.addEventListener("click", () => {
-  stopOtherWorkingTimer(breakTimer, playBreakBtn, stopBreakBtn); //* stop working break timer
+  // &default timer
+  if (!selectedTask) {
+    let defaultTimer = timersList.find((timer) => timer.taskId == 0);
+    defaultTimer = !defaultTimer ? myTimers.addTaskTimers(0) : defaultTimer;
+
+    selectedOngoingTimer = defaultTimer?.ongoingTimer;
+    selectedBreakTimer = defaultTimer?.breakTimer;
+  }
+  //* stop break timer & switch its buttons
+  selectedBreakTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "break",
+        playBreakBtn,
+        stopBreakBtn
+      )
+    : null;
+
+  //* stop break timer & switch its buttons
+  selectedOngoingTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "ongoing",
+        playOngoingBtn,
+        stopOngoingBtn
+      )
+    : null;
 
   if (
-    !ongoingTimer.getIsWorking() ||
-    (ongoingTimer.getMins() == 0 && ongoingTimer.getSecs() == 0)
+    !selectedOngoingTimer.isWorking ||
+    (selectedOngoingTimer.minutes == 0 && selectedOngoingTimer.seconds == 0)
   ) {
     switchBtns(playOngoingBtn, stopOngoingBtn);
   }
 
-  ongoingTimer.rePlayTimer();
+  myTimers.rePlayTimer(selectedTask?.id, "ongoing");
+
+  selectedOngoingTimer = myTimers.retrieveTimers(
+    selectedTask?.id
+  )?.ongoingTimer;
 
   //* update range & txt with timer
   displayTimerData(
-    ongoingTimer,
+    selectedTask,
+    myTasks,
+    myTimers,
+    selectedOngoingTimer,
     ongoingTimerMins,
     ongoingTimerSecs,
     ongoingRange,
@@ -519,20 +814,52 @@ replayOngoingBtn.addEventListener("click", () => {
 });
 
 replayBreakBtn.addEventListener("click", () => {
-  stopOtherWorkingTimer(ongoingTimer, playOngoingBtn, stopOngoingBtn); //* stop working ongoing timer
+  // &default timer
+  if (!selectedTask) {
+    let defaultTimer = timersList.find((timer) => timer.taskId == 0);
+    defaultTimer = !defaultTimer ? myTimers.addTaskTimers(0) : defaultTimer;
+
+    selectedOngoingTimer = defaultTimer?.ongoingTimer;
+    selectedBreakTimer = defaultTimer?.breakTimer;
+  }
+  //* stop break timer & switch its buttons
+  selectedOngoingTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "ongoing",
+        playOngoingBtn,
+        stopOngoingBtn
+      )
+    : null;
+
+  selectedBreakTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "break",
+        playBreakBtn,
+        stopBreakBtn
+      )
+    : null;
 
   if (
-    !breakTimer.getIsWorking() ||
-    (breakTimer.getMins() == 0 && breakTimer.getSecs() == 0)
+    !selectedBreakTimer.isWorking ||
+    (selectedBreakTimer.minutes == 0 && selectedBreakTimer.seconds == 0)
   ) {
     switchBtns(playBreakBtn, stopBreakBtn);
   }
 
-  breakTimer.rePlayTimer();
+  myTimers.rePlayTimer(selectedTask?.id, "break");
+
+  selectedBreakTimer = myTimers.retrieveTimers(selectedTask?.id)?.breakTimer;
 
   //* update range & txt with timer
   displayTimerData(
-    breakTimer,
+    selectedTask,
+    myTasks,
+    myTimers,
+    selectedBreakTimer,
     breakTimerMins,
     breakTimerSecs,
     breakRange,
@@ -542,53 +869,53 @@ replayBreakBtn.addEventListener("click", () => {
 });
 
 // & move to next session in ongoing timer
-updateTimerData(selectedTask, tasksList.length);
 nextSessionBtn.addEventListener("click", () => {
   //* stop timer of previous session
-  stopOtherWorkingTimer(ongoingTimer, playOngoingBtn, stopOngoingBtn);
-  stopOtherWorkingTimer(breakTimer, playBreakBtn, stopBreakBtn);
+  selectedOngoingTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "ongoing",
+        playOngoingBtn,
+        stopOngoingBtn
+      )
+    : null;
+
+  selectedBreakTimer.isWorking
+    ? stopOtherWorkingTimer(
+        selectedTask?.id,
+        myTimers,
+        "break",
+        playBreakBtn,
+        stopBreakBtn
+      )
+    : null;
 
   //*set new timer
-  ongoingTimer.moveToNextSession();
-  ongoingTimerMins.innerText = "25";
-  ongoingTimerSecs.innerText = "00";
+  myTimers.resetTimer(selectedTask?.id, "ongoing");
+  selectedOngoingTimer = myTimers.retrieveTimers(
+    selectedTask?.id
+  )?.ongoingTimer;
+
+  //* update range & txt with timer
+  updateUI(
+    selectedOngoingTimer,
+    ongoingTimerMins,
+    ongoingTimerSecs,
+    ongoingRange
+  );
 
   // *update session
-  myTasks.updateCurrentSession(selectedTask.id);
-  selectedTask = myTasks.retrieveTask(selectedTask.id);
-  currentSession.innerText = selectedTask.currentSession;
+  myTasks.updateCurrentSession(selectedTask?.id);
 
-  document.querySelector(
-    `#task-box-${selectedTask.id} .current-session`
-  ).innerText = selectedTask.currentSession;
+  selectedTask = myTasks.retrieveTask(selectedTask?.id);
 
-  if (
-    selectedTask.currentSession == selectedTask.sessionNumber &&
-    !selectedTask.isCompleted
-  ) {
-    // * display celebration msg
-    displayCelebrationMsg();
-    myTasks.completeTask(selectedTask.id);
-    document
-      .querySelector(`#task-box-${selectedTask.id} .circle`)
-      .classList.toggle("bg-color-secondary");
-
-    selectedTask = myTasks.retrieveTask(selectedTask.id);
-
-    document.querySelector(
-      `#task-box-${selectedTask.id} li.complete-task-btn`
-    ).innerText = selectedTask.isCompleted
-      ? "Uncomplete Task"
-      : "Complete Task";
-    nextSessionBtn.style.cssText =
-      "color:grey; border:2px solid grey; cursor:not-allowed";
-
-    selectedTask.isCompleted
-      ? document
-          .querySelector(`#task-box-${selectedTask.id} li.edit-task-btn`)
-          .classList.add("d-none")
-      : document
-          .querySelector(`#task-box-${selectedTask.id} li.edit-task-btn`)
-          .classList.remove("d-none");
-  }
+  updateTimerData(
+    selectedTask,
+    selectedOngoingTimer,
+    selectedBreakTimer,
+    tasksList.length,
+    playOngoingBtn,
+    playBreakBtn
+  );
 });

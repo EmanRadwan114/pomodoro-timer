@@ -89,6 +89,14 @@ textarea::placeholder,
   height: 100%;
   padding-bottom: 60px;
 }
+#timer #ongoing,
+#timer #break {
+  min-height: 100%;
+}
+
+#timer #break .count-down-time {
+  margin: 47px 0 15px 0;
+}
 
 #tasks .search label {
   right: 3%;
@@ -102,7 +110,7 @@ textarea::placeholder,
 #menu ul {
   position: absolute;
   right: 10%;
-  top: 95%;
+  top: 90%;
   min-width: 220px;
   visibility: hidden;
   opacity: 0;

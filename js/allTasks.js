@@ -1,4 +1,5 @@
 import Task from "./task.js";
+import Timer from "./timer.js";
 
 export default class TasksContainer {
   #tasksContainer;

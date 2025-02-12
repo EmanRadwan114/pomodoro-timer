@@ -1,14 +1,19 @@
 import {
   addNoteBtn,
+  breakRange,
+  breakTimerMins,
+  breakTimerSecs,
   categoryItems,
   celebrationMsg,
   nextSessionBtn,
   noteContent,
   notificationSound,
+  ongoingRange,
+  ongoingTimerMins,
+  ongoingTimerSecs,
   sessionNum,
   sessionNumericals,
   sessionTime,
-  startingTxt,
   tasksContainer,
   taskTitle,
   titleField,
@@ -36,23 +41,29 @@ export function switchBtns(btn_1, btn_2) {
 
 function calculateProgress(timer, range) {
   //* Calculate progress for range slider
-  let remainingSeconds = timer.getMins() * 60 + timer.getSecs();
-  let percentage = (remainingSeconds / timer.getTotalSeconds()) * 100;
+  let remainingSeconds = timer.minutes * 60 + timer.seconds;
+  let percentage = (remainingSeconds / timer.totalSeconds) * 100;
   range.style.width = 100 - percentage + "%";
 }
 
-function updateUI(timer, minTxt, secTxt, range) {
-  minTxt.innerText =
-    timer.getMins() < 10 ? `0${timer.getMins()}` : timer.getMins();
-  secTxt.innerText =
-    timer.getSecs() < 10 ? `0${timer.getSecs()}` : timer.getSecs();
+export function updateUI(timer, minTxt, secTxt, range) {
+  if (timer.isStarted) {
+    minTxt.innerText = timer.minutes < 10 ? `0${timer.minutes}` : timer.minutes;
+    secTxt.innerText = timer.seconds < 10 ? `0${timer.seconds}` : timer.seconds;
+  } else {
+    minTxt.innerText = timer.minutes + 1;
+    secTxt.innerText = "00";
+  }
 
   //* Calculate progress for range slider
   calculateProgress(timer, range);
 }
 
-let displayInterval;
+export let displayInterval;
 export const displayTimerData = (
+  selectedTask,
+  myTasks,
+  myTimers,
   timer,
   minTxt,
   secTxt,
@@ -61,37 +72,57 @@ export const displayTimerData = (
   btn_2
 ) => {
   // *Calculate progress for range slider
-  calculateProgress(timer, range);
+  updateUI(timer, minTxt, secTxt, range);
 
   displayInterval = setInterval(() => {
     //* update ui every second
     updateUI(timer, minTxt, secTxt, range);
 
     //* reset timer ui
-    resetTimerUI(timer, btn_1, btn_2);
-
-    if (!timer.getIsWorking()) {
-      clearInterval(displayInterval);
+    if (
+      (timer.minutes == 0 && timer.seconds == 0) ||
+      (timer.initialMinutes == timer.minutes &&
+        timer.initialSeconds == timer.seconds &&
+        timer.isStarted)
+    ) {
+      switchBtns(btn_1, btn_2);
       notificationSound.play();
+      clearInterval(displayInterval);
+    }
+    if (
+      timer.minutes == 0 &&
+      timer.seconds == 0 &&
+      selectedTask.currentSession == selectedTask.sessionNumber &&
+      !selectedTask.isCompleted
+    ) {
+      myTasks.completeTask(selectedTask.id);
+      myTimers.completeTimer(selectedTask.id);
+      document
+        .querySelector(`#task-box-${selectedTask.id} .circle`)
+        .classList.toggle("bg-color-secondary");
+      displayCelebrationMsg();
+      btn_1.style.cssText =
+        "background-color:grey; color:white; border:2px solid grey; cursor:not-allowed";
+      btn_1.setAttribute("disabled", "disabled");
+    }
+    if (!timer.isWorking) {
+      clearInterval(displayInterval);
     }
   }, 1000);
 };
 
-export function stopOtherWorkingTimer(timer, btn_1, btn_2) {
-  if (timer.getIsWorking()) {
-    timer.stopTimer();
-    switchBtns(btn_1, btn_2);
-  }
+export function stopOtherWorkingTimer(
+  taskId,
+  myTimers,
+  timerType,
+  btn_1,
+  btn_2
+) {
+  myTimers.stopTimer(taskId, timerType);
+  switchBtns(btn_1, btn_2);
 
   if (displayInterval != undefined) {
     clearInterval(displayInterval);
-  }
-}
-
-function resetTimerUI(timer, btn_1, btn_2) {
-  if (timer.getMins() == 0 && timer.getSecs() == 0) {
-    timer.resetTimer();
-    switchBtns(btn_1, btn_2);
   }
 }
 
@@ -340,8 +371,8 @@ export function displayUserProgress(txt, tasksList) {
       : `(${tasksList.length} Task)`;
 
   tasksList.filter((task) => task.isCompleted == true).length >= 1
-    ? txt.celebrateTxt.classList.remove("v-hidden", "opacity-0")
-    : txt.celebrateTxt.classList.add("v-hidden", "opacity-0");
+    ? (txt.celebrateTxt.innerText = `Tasks Were Completed 🎉👏`)
+    : (txt.celebrateTxt.innerText = `Track Your Progress Here 🕘`);
 }
 
 export function displayTaskInfo(myTasks, id) {
@@ -414,30 +445,76 @@ export function emptyTaskContainer() {
                 </div>`;
 }
 
-export function updateTimerData(selectedTask, tasksListLength) {
+export function updateTimerData(
+  selectedTask,
+  selectedOngoingTimer,
+  selectedBreakTimer,
+  tasksListLength,
+  btn_1,
+  btn_2
+) {
   if (selectedTask) {
-    sessionNumericals.classList.remove("v-hidden");
-    taskTitle.classList.remove("v-hidden");
-    nextSessionBtn.style.cssText =
+    if (
       selectedTask.sessionNumber > 1 &&
       !selectedTask.isCompleted &&
       selectedTask.sessionNumber != selectedTask.currentSession
-        ? "cursor:pointer"
-        : "color:grey; border:2px solid grey; cursor:not-allowed";
+    ) {
+      nextSessionBtn.style.cssText = "cursor:pointer";
+      nextSessionBtn.removeAttribute("disabled");
+    } else {
+      nextSessionBtn.style.cssText =
+        "color:grey; border:2px solid grey; cursor:not-allowed";
+      nextSessionBtn.setAttribute("disabled", "disabled");
+    }
+
+    if (selectedTask.isCompleted) {
+      btn_1.style.cssText =
+        "background-color:grey; color:white; border:2px solid grey; cursor:not-allowed";
+      btn_1.setAttribute("disabled", "disabled");
+      btn_2.style.cssText =
+        "background-color:grey; color:white; border:2px solid grey; cursor:not-allowed";
+      btn_2.setAttribute("disabled", "disabled");
+    } else {
+      btn_1.style.cssText = "cursor:pointer";
+      btn_1.removeAttribute("disabled");
+      btn_2.style.cssText = "cursor:pointer";
+      btn_2.removeAttribute("disabled");
+    }
+
+    sessionNumericals.children[0].innerText = selectedTask.currentSession;
+    sessionNumericals.children[1].innerText = selectedTask.sessionNumber;
+    taskTitle.children[0].innerText = tasksListLength - selectedTask.id + 1;
+    taskTitle.children[1].innerText = selectedTask.title;
+
+    updateUI(
+      selectedOngoingTimer,
+      ongoingTimerMins,
+      ongoingTimerSecs,
+      ongoingRange
+    );
+    updateUI(selectedBreakTimer, breakTimerMins, breakTimerSecs, breakRange);
   } else {
-    sessionNumericals.classList.add("v-hidden");
-    taskTitle.classList.add("v-hidden");
+    sessionNumericals.children[0].innerText = "1";
+    sessionNumericals.children[1].innerText = "1";
+    taskTitle.children[0].innerText = "#";
+    taskTitle.children[1].innerText = "Start Timer 😊";
     nextSessionBtn.style.cssText =
       "color:grey; border:2px solid grey; cursor:not-allowed";
+    btn_1.style.cssText = "cursor:pointer";
+    btn_1.removeAttribute("disabled");
+    btn_2.style.cssText = "cursor:pointer";
+    btn_2.removeAttribute("disabled");
+    updateUI(
+      selectedOngoingTimer,
+      ongoingTimerMins,
+      ongoingTimerSecs,
+      ongoingRange
+    );
+    updateUI(selectedBreakTimer, breakTimerMins, breakTimerSecs, breakRange);
   }
-
-  sessionNumericals.children[0].innerText = selectedTask?.currentSession;
-  sessionNumericals.children[1].innerText = selectedTask?.sessionNumber;
-  taskTitle.children[0].innerText = tasksListLength - selectedTask?.id + 1;
-  taskTitle.children[1].innerText = selectedTask?.title;
 }
 
-export function displayCelebrationMsg() {
+function displayCelebrationMsg() {
   yaySound.play();
   // Get the user's scroll position
   const x = window.scrollX + window.innerWidth / 2 - 25; // Center horizontally
@@ -453,6 +530,6 @@ export function displayCelebrationMsg() {
   }, 1000);
 
   setTimeout(() => {
-    celebrationMsg.classList.add("d-none");
+    celebrationMsg.classList.add("v-hidden", "opacity-0");
   }, 3500);
 }
