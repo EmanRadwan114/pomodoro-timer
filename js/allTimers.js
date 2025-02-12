@@ -22,7 +22,7 @@ export default class TimersContainer {
 
   addTaskTimers(taskId = 0) {
     const newTimers = { taskId, isCompleted: false };
-    newTimers.ongoingTimer = new Timer(0, 10);
+    newTimers.ongoingTimer = new Timer(24, 60);
     newTimers.breakTimer = new Timer(4, 60);
     this.#timersContainer.push(newTimers);
     this.saveAllTimers();
